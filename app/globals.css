@@ -56,12 +56,13 @@
     --chart-5: 340 75% 55%
   }
 }
+
 @layer base {
   * {
-    @apply border-border;
+    @apply border-gray-300; /* Replace with an existing utility */
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-gray-100 text-gray-800; /* Replace with existing utilities */
   }
 }
 
