@@ -59,10 +59,10 @@
 
 @layer base {
   * {
-    @apply border-gray-300; /* Replace with an existing utility */
+    @apply border-border;
   }
   body {
-    @apply bg-gray-100 text-gray-800; /* Replace with existing utilities */
+    @apply bg-background text-foreground;
   }
 }
 
