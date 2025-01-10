@@ -345,16 +345,6 @@ async function constructShareUrl(){
   setShareInput(constructedUrl);
 }
 
-// fucntion to handle if shared user id not allowed to make changes
-async function blockSharedUserToMakeChanges(){
-  // suppose user is not allowed to make changes setCanSharedUserMakeChanges == false
-  // then other user
-  // --> can't create new new 
-  // --> can't delete nodes
-  // --> can't change the color
-  // --> can't edit the node whether its link or the text part 
-}
-
 
 
 
