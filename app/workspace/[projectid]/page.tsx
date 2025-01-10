@@ -54,37 +54,11 @@ export default function page() {
   const ref = useRef<HTMLDivElement>(null);
   const [shareInput,setShareInput] = useState("");
   const [canSharedUserMakeChanges,setCanSharedUserMakrChanges] = useState(false)
+  const [checkCreatedNewNode,setCheckCreatedNewNode] = useState<boolean>(false);
+  const [ parentNodePosition,setParentNodePosition] = useState<Position>({ x : 400 , y : 50 });
+  const [ childNodePosition,setChildNodePosition] = useState<Position>({ x : 0 , y : 0 });
   const { projectid } = useParams()
 
-
-  
-
-  useEffect(() => {
-    
-    const initialNodes = nodeData.flatMap((nodefield : any) => [{
-      id : `${nodefield?._id.toString()}`,
-      position : {
-        x : nodefield?.position?.x,
-        y :  nodefield?.position?.y,
-      },  
-      data : {
-        label : `${nodefield?.title}`
-      }
-    }])
-
-    const initialEdges = nodeData.flatMap((nodefield : any) => {
-      if(!nodefield?.parentNodeID) return []; //if no parent of a node then it mean it is root node
-      return [{
-        id : `e${nodefield?.parentNodeID}-${nodefield?._id}`,
-        source : `${nodefield?.parentNodeID}`,
-        target : `${nodefield?._id.toString()}`
-      }]
-    }) 
-
-    setNodes(initialNodes)
-    setEdges(initialEdges)
-
-  },[nodeData])
 
 
   // on window load fetch all node of a project
@@ -112,7 +86,35 @@ export default function page() {
       }
     }
       fetchallNodes()
-  },[])
+  },[checkCreatedNewNode])
+
+
+  useEffect(() => {
+    
+    const initialNodes = nodeData.flatMap((nodefield : any) => [{
+      id : `${nodefield?._id.toString()}`,
+      position : {
+        x : nodefield?.position?.x,
+        y :  nodefield?.position?.y,
+      },  
+      data : {
+        label : `${nodefield?.title}`
+      }
+    }])
+
+    const initialEdges = nodeData.flatMap((nodefield : any) => {
+      if(!nodefield?.parentNodeID) return []; //if no parent of a node then it mean it is root node
+      return [{
+        id : `e${nodefield?.parentNodeID}-${nodefield?._id}`,
+        source : `${nodefield?.parentNodeID}`,
+        target : `${nodefield?._id.toString()}`
+      }]
+    }) 
+
+    setNodes(initialNodes)
+    setEdges(initialEdges)
+
+  },[nodeData,checkCreatedNewNode])
 
   // async function to create node
   async function createDefaultNode(){
@@ -123,7 +125,7 @@ export default function page() {
         headers : {
           "Content-Type":"application/json"
         },
-        body : JSON.stringify({ title : "Default Node", position : { "x" : 500 , "y" : 50 } })
+        body : JSON.stringify({ title : "Default Node", position : { "x" : parentNodePosition.x , "y" : parentNodePosition.y } })
       })
 
       if(res.status != 201){
@@ -145,15 +147,19 @@ export default function page() {
   // how the flow will look like 
   // select a node -> after selecting a node find its detail -> press shift+N -> after it pressed i will pass his id as parentnodeid and call the function
 
-  async function createNewNode(parent_id : any) {
+  async function createNewNode(parent_id : string | any) {
     try {
+
+      // here i need to find the position of the node that is being created and set position of it 
+
+      const nodePositon : Position = calculateChildNodePosition(parentNodePosition,totalChildNodeCount)
 
       const res = await fetch(`/api/addnodes/${projectid}`,{
         method : "POST",
         headers : {
           "Content-Type":"application/json"
         },
-        body : JSON.stringify({ title : "New Node", position : { "x" : 300 , "y" : 300 },parentNodeID : parent_id }) // here i will need to pass the parent node id 
+        body : JSON.stringify({ title : "New Node", position : { "x" : nodePositon.x , "y" : nodePositon.y },parentNodeID : parent_id })  
       })
 
       if(res.status != 201){
@@ -163,6 +169,8 @@ export default function page() {
       const data = await res.json()
 
       console.log(data?.message)
+
+      setCheckCreatedNewNode(!checkCreatedNewNode)
 
     } catch (error) {
       console.log(error ?? "Internal Server error")
@@ -195,7 +203,7 @@ export default function page() {
       const res = await fetch(`/api/fetchSingleNode/${id}`)
       if(res.status != 200){
         console.log(res)
-      }
+      } 
 
       const data = await res.json()
 
@@ -205,6 +213,14 @@ export default function page() {
       const totaChilddata : any = data?.data?.childNodeID
       // console.log(totaChilddata.length)
       setTotalChildNodeCount(totaChilddata.length) //setting total child node count to calculate the position of the node.
+
+
+      // calulating position of the parent node 
+      const calculateParentNodePositon : Position = data?.data?.position
+      console.log(calculateParentNodePositon)
+
+      setParentNodePosition(calculateParentNodePositon);
+      
 
       
     } catch (error) {
@@ -345,29 +361,30 @@ async function blockSharedUserToMakeChanges(){
 
 
 
+// function to calculate position 
+// it will return the positon of the newly node created
 
+ const Horizontal_Spacing : number = 100;
+ const Vertical_Spacing : number = 70;
 
-//  // function to calculate position 
+  const calculateChildNodePosition = (parentPosition : Position, totalChildren : number | any) => {
+    // if parent Node don't have any child then the posiont of its first child
 
-//  const Horizontal_Scaling : number = 100;
-//  const Vertical_Scaling : number = 70;
+    if(totalChildren === 1){
+        return {
+            x : parentPosition.x,
+            y : parentPosition.y + Vertical_Spacing
+        }
+    } 
 
-//  const calculatePosition = (parentPosition : Position, ChildIndex : number, totalchildren : number) => {
-//    if(totalchildren === 1){
-//      return {
-//        x : parentPosition.x,
-//        y : parentPosition.y + Vertical_Scaling
-//      }
-//    }
+      const startX = parentPosition.x - ((totalChildren - 1) * Horizontal_Spacing) / 2;
 
-//    //if there are more than one children than thw position of child will be 
-//    const startx = parentPosition.x - ((totalchildren - 1) * Horizontal_Scaling) / 2;
+      return {
+        x: startX + ((totalChildNodeCount+1) * Horizontal_Spacing),
+        y: parentPosition.y + Vertical_Spacing
+      };
 
-//    return {
-//     x : startx + (child)
-//    }
-
-//  }
+  }
 
 
 
