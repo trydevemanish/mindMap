@@ -1,5 +1,15 @@
-import React, { useCallback } from 'react';
-import { useReactFlow } from '@xyflow/react';
+import React, { useCallback, useState } from 'react';
+import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { BgColorList } from "@/components/Bgcolor"
  
 export default function ContextMenu({
   id,
@@ -8,74 +18,82 @@ export default function ContextMenu({
   right,
   bottom,
   onClick,
+  newNodeCreationFunction,
+  deletionOfNodeFunction,
   ...props
-} : { id : any , top : any, left : any, right : any, bottom : any, onClick?: () => void;}) {
-  const { getNode, setNodes, addNodes, setEdges } = useReactFlow();
-  const duplicateNode = useCallback(() => {
-    const node : any = getNode(id);
-    const position = {
-      x: node.position.x + 50,
-      y: node.position.y + 50,
-    };
- 
-    addNodes({
-      ...node,
-      selected: false,
-      dragging: false,
-      id: `${node.id}-copy`,
-      position,
-    });
-  }, [id, getNode, addNodes]);
- 
-  const deleteNode = useCallback(() => {
-    setNodes((nodes) => nodes.filter((node) => node.id !== id));
-    setEdges((edges) => edges.filter((edge) => edge.source !== id));
-  }, [id, setNodes, setEdges]);
+} : { id : any , top : any, left : any, right : any, bottom : any, onClick?: () => void, newNodeCreationFunction? : (id : any) => any, deletionOfNodeFunction? : (id :any) => any }) {
 
-
-
-  async function createNewNode(parent_id : any) {
-    try {
-
-      const res = await fetch(`/api/addnodes/${id}`,{
-        method : "POST",
-        headers : {
-          "Content-Type":"application/json"
-        },
-        body : JSON.stringify({ title : "New Node", position : { "x" : 300 , "y" : 300 },parentNodeID : parent_id }) // here i will need to pass the parent node id 
-      })
-
-      if(res.status != 201){
-        console.log("Error While creatinig Node in DB")
-      }
-
-      const data = await res.json()
-
-      console.log(data?.message)
-
-    } catch (error) {
-      console.log(error ?? "Internal Server error")
+    const handleNewNodeCreation = () => {
+        newNodeCreationFunction(id);
     }
-  }
 
+    const handleDeletionOfNode = () => {
+        deletionOfNodeFunction(id);
+    }
 
- 
+    const handleChangeOfBackgroundColor = async(bgColorCode : any) => {
+      try {
+         
+        const res = await fetch(`/api/chBgcolor/${id}`,{
+          method : "PUT",
+          headers : {
+            "Content-Type" : "application/json"
+          },
+          body : JSON.stringify({ bgcolorcode : bgColorCode })
+        })
+
+        if(res.status != 200){
+           console.log(res)
+        }
+
+        const data = await res.json()
+
+        console.log(data?.data?.message)
+
+        // pass a flag to refresh the page so that bg color changes
+        
+                
+      } catch (error) {
+        console.log(error ?? "Internal Server error")
+      }
+    }
+
+  
   return (
     <div
       style={{ top, left, right, bottom }}
-      className="context-menu"
+      className="context-menu flex-col justify-center items-center"
       {...props}
     >
-      <p style={{ margin: '0.5em' }}>
-        <small>node: {id}</small>
-      </p>
-      <button onClick={duplicateNode}>duplicate</button>
-      <button onClick={deleteNode}>delete</button>
-      <button onClick={createNewNode}>New Node</button>
-      <button>Edit text</button>
-      <button>Bg color</button>
-      <button>text color</button>
-      <button>Mark as Done</button>
+      <div onClick={handleNewNodeCreation} className='pl-3 pr-3 py-1'>New Node</div>
+      <div onClick={handleDeletionOfNode} className='pl-3 pr-3 py-1'>Delete</div>
+      <div className='pl-3 pr-3 py-1'>Edit text</div>
+      <div className='pl-3 pr-3 py-1'>text color</div>
+      <div className=' text-sm pl-1'> 
+        <Dialog>
+          <DialogTrigger asChild>
+            <button>Change Bg</button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[300px]">
+            <DialogHeader>
+              <DialogTitle />
+              <DialogDescription>
+                Choose Background Color of Node.
+              </DialogDescription>
+            </DialogHeader>
+              {Array.isArray(BgColorList) && BgColorList.map((bgcolorfields : any, idx :any) => (
+                <p 
+                    key={bgcolorfields?.bgColor_id} 
+                    className='cursor-pointer' 
+                    onClick={() => handleChangeOfBackgroundColor(bgcolorfields?.bgColorCode)}
+                >
+                  {bgcolorfields?.bgColorName}
+                </p>
+              ))}
+            <DialogFooter />
+          </DialogContent>
+        </Dialog>
+      </div>
     </div>
   );
 }

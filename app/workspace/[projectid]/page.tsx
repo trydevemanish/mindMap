@@ -53,10 +53,9 @@ export default function page() {
   const [menu, setMenu] = useState<Menu>(null);
   const ref = useRef<HTMLDivElement>(null);
   const [shareInput,setShareInput] = useState("");
-  const [canSharedUserMakeChanges,setCanSharedUserMakrChanges] = useState(false)
+  const [checkPostitionUpdated,setCheckPostitionUpdated] = useState(false)
   const [checkCreatedNewNode,setCheckCreatedNewNode] = useState<boolean>(false);
   const [ parentNodePosition,setParentNodePosition] = useState<Position>({ x : 400 , y : 50 });
-  const [ childNodePosition,setChildNodePosition] = useState<Position>({ x : 0 , y : 0 });
   const { projectid } = useParams()
 
 
@@ -86,7 +85,7 @@ export default function page() {
       }
     }
       fetchallNodes()
-  },[checkCreatedNewNode])
+  },[checkCreatedNewNode,checkPostitionUpdated])
 
 
   useEffect(() => {
@@ -114,7 +113,7 @@ export default function page() {
     setNodes(initialNodes)
     setEdges(initialEdges)
 
-  },[nodeData,checkCreatedNewNode])
+  },[nodeData,checkCreatedNewNode,checkPostitionUpdated])
 
   // async function to create node
   async function createDefaultNode(){
@@ -347,6 +346,37 @@ async function constructShareUrl(){
 
 
 
+const handleNodeDragStop = (event: React.MouseEvent, node: Node) => {
+  console.log("node id which is moved",node?.id)
+  updatedNodePosition(node?.id, node?.position?.x,node?.position?.y)
+}
+
+async function updatedNodePosition(nodeid : any, new_X :any , new_Y : any) {
+  try {
+
+     const res = await fetch(`/api/changeNodePosition/${nodeid}`,{
+      method: "PUT",
+      headers : {
+        "Content-Type" : "application/json"
+      },
+      body : JSON.stringify({ new_X, new_Y })
+     })
+
+     if(res.status != 200){
+      console.log("failed res data",res)
+     }
+
+     const data = await res.json()
+
+     setCheckPostitionUpdated(!checkPostitionUpdated)
+    
+  } catch (error) {
+    console.log(error ?? "failed to update Position")
+  }
+}
+
+
+
 
 
 
@@ -375,11 +405,6 @@ async function constructShareUrl(){
       };
 
   }
-
-
-
-
-
 
 
   //---------------------------------------------------------------------------------------------------------
@@ -471,10 +496,11 @@ async function constructShareUrl(){
               onNodeClick={onNodeClick}
               onPaneClick={onPaneClick}
               onNodeContextMenu={onNodeContextMenu}
+              onNodeDragStop={handleNodeDragStop}
               fitView
             >
      <Background />
-      {menu && <ContextMenu onClick={onPaneClick} {...menu} />}
+      {menu && <ContextMenu onClick={onPaneClick} {...menu} newNodeCreationFunction={createNewNode} deletionOfNodeFunction={deleteNode} />}
     </ReactFlow>
    </div>
   )
