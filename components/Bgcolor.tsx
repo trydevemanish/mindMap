@@ -1,22 +1,22 @@
 const BgColorList = [
     {
         bgColor_id : 1,
-        bgColorName : "A",
-        bgColorCode : '£23422'
+        bgColorName : "color 1",
+        bgColorCode : '#EF6444'
     },
     {
         bgColor_id : 2,
-        bgColorName : "B",
-        bgColorCode : '£23422'
+        bgColorName : "color 2",
+        bgColorCode : '#FAA31B'
     },
     {
         bgColor_id : 3,
-        bgColorName : "C",
-        bgColorCode : '£23422'
+        bgColorName : "color 3",
+        bgColorCode : '#FFF000'
     },
     {
         bgColor_id : 4,
-        bgColorName : "D",
+        bgColorName : "color 4",
         bgColorCode : '£23422'
     },
     {

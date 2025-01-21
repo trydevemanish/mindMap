@@ -53,8 +53,12 @@ export default function page() {
   const [menu, setMenu] = useState<Menu>(null);
   const ref = useRef<HTMLDivElement>(null);
   const [shareInput,setShareInput] = useState("");
+
   const [checkPostitionUpdated,setCheckPostitionUpdated] = useState(false)
   const [checkCreatedNewNode,setCheckCreatedNewNode] = useState<boolean>(false);
+  const [checkBgColorChange,setCheckBgColorChange] = useState(false);
+  const [checktextUpdated,setCheckTextUpdated] = useState(false);
+
   const [ parentNodePosition,setParentNodePosition] = useState<Position>({ x : 400 , y : 50 });
   const { projectid } = useParams()
 
@@ -85,7 +89,7 @@ export default function page() {
       }
     }
       fetchallNodes()
-  },[checkCreatedNewNode,checkPostitionUpdated])
+  },[checkCreatedNewNode,checkPostitionUpdated,checkBgColorChange,checktextUpdated])
 
 
   useEffect(() => {
@@ -113,10 +117,10 @@ export default function page() {
     setNodes(initialNodes)
     setEdges(initialEdges)
 
-  },[nodeData,checkCreatedNewNode,checkPostitionUpdated])
+  },[nodeData,checkCreatedNewNode,checkPostitionUpdated,checkBgColorChange,checktextUpdated])
 
   // async function to create node
-  async function createDefaultNode(){
+  async function createDefaultNode(){ 
     try {
 
       const res = await fetch(`/api/addnodes/${projectid}`,{
@@ -173,6 +177,53 @@ export default function page() {
 
     } catch (error) {
       console.log(error ?? "Internal Server error")
+    }
+  }
+
+
+  // updating Background Color of Node
+  async function updateBgColorOfnode(nodeid : any, bgColorCode : string) {
+    try {
+
+      const res = await fetch(`/api/changeNodePosition/${nodeid}`,{
+        method : "PUT",
+        headers : {
+          "Content-Type" : "application/json"
+        },
+        body : JSON.stringify({ bgColorCode })
+      })
+
+      if(res.status != 200){
+        console.log(res)
+      }
+
+      const data = await res.json()
+
+      console.log("Node Bg Updated",data?.data)
+
+      setNodes((nds) =>
+        nds.map((node) => {
+          if (node.id === nodeid ) {
+            // it's important that you create a new node object
+            // in order to notify react flow about the change
+            return {
+              ...node,
+              style: {
+                ...node.style,
+                backgroundColor: bgColorCode,
+              },
+            };
+          }
+   
+          return node;
+        }),
+      );
+   
+
+      setCheckBgColorChange(!checkBgColorChange)
+
+    } catch (error) {
+      console.log(error ?? "Internal server error")
     }
   }
 
@@ -278,9 +329,7 @@ const onNodeContextMenu = useCallback(
   [setMenu],
 );
 
-
 const onPaneClick = useCallback(() => setMenu(null), [setMenu]);
-
 
 // function to download the file 
 async function downloadInPdfFormat(){
@@ -344,8 +393,6 @@ async function constructShareUrl(){
   setShareInput(constructedUrl);
 }
 
-
-
 const handleNodeDragStop = (event: React.MouseEvent, node: Node) => {
   console.log("node id which is moved",node?.id)
   updatedNodePosition(node?.id, node?.position?.x,node?.position?.y)
@@ -377,6 +424,52 @@ async function updatedNodePosition(nodeid : any, new_X :any , new_Y : any) {
 
 
 
+// async function to update text 
+
+async function updatedText(nodeid :any, updatedText :string){
+  try {
+
+    const res = await fetch(`/api/changetextofNode/${nodeid}`,{
+      method  : 'PUT',
+      headers : {
+        "Content-Type" : "application/json"
+      },
+      body : JSON.stringify({ updatedText })
+    })
+
+    if(res.status != 200){
+      console.log(res)
+    }
+
+    const data = await res.json()
+
+    console.log(data?.data?.message)
+
+    setCheckTextUpdated(!checktextUpdated)
+    
+  } catch (error) {
+     console.log(error ?? "failed to update text")
+  }
+}
+
+
+async function UpdateAddLink(nodeid : any,link:string) {
+  const res = await fetch(`/api/addLinktoNode/${nodeid}`,{
+    method  : 'PUT',
+    headers : {
+      "Content-Type" : "application/json"
+    },
+    body : JSON.stringify({ link })
+  })
+
+  if(res.status != 200){
+    console.log(res)
+  }
+
+  const data = await res.json()
+
+  console.log(data?.data?.message)
+}
 
 
 
@@ -500,7 +593,7 @@ async function updatedNodePosition(nodeid : any, new_X :any , new_Y : any) {
               fitView
             >
      <Background />
-      {menu && <ContextMenu onClick={onPaneClick} {...menu} newNodeCreationFunction={createNewNode} deletionOfNodeFunction={deleteNode} />}
+      {menu && <ContextMenu onClick={onPaneClick} {...menu} newNodeCreationFunction={createNewNode} deletionOfNodeFunction={deleteNode} updateBgColorOfnode={updateBgColorOfnode} updatedText={updatedText} UpdateAddLink={UpdateAddLink} />}
     </ReactFlow>
    </div>
   )

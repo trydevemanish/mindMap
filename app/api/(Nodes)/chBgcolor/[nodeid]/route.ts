@@ -2,11 +2,22 @@ import { nodeModel } from "@/model/nodes";
 import { NextResponse } from "next/server";
 import { connectDb } from "@/connections/connectDb";
 
-async function PUT(req:Request, { params } : { params : any }) {
+export async function PUT(req:Request, { params } : { params : any }) {
     try {
 
         await connectDb()
-        const { bgcolorcode } = await req.json()
+
+        const { bgColorCode } = await req.json()
+
+        console.log("bgcolor code",bgColorCode)
+
+        if(!bgColorCode){
+            return NextResponse.json(
+                {message : "Bg color code didn't received"},
+                {status : 400}
+            )
+        }
+
         const { nodeid } = await params
 
         if(!nodeid) {
@@ -19,8 +30,8 @@ async function PUT(req:Request, { params } : { params : any }) {
         const bgUpdated = await nodeModel.findByIdAndUpdate(
             nodeid,
             {
-                style : {
-                    backgroundColor : bgcolorcode
+                $set : { 
+                    'style.backgroundColor' : bgColorCode
                 }
             }
         )

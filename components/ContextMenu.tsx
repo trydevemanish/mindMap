@@ -10,6 +10,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { BgColorList } from "@/components/Bgcolor"
+import { Label } from '@radix-ui/react-label';
+import { Input } from '@/components/ui/input';
  
 export default function ContextMenu({
   id,
@@ -20,8 +22,14 @@ export default function ContextMenu({
   onClick,
   newNodeCreationFunction,
   deletionOfNodeFunction,
+  updateBgColorOfnode,
+  updatedText,
+  UpdateAddLink,
   ...props
-} : { id : any , top : any, left : any, right : any, bottom : any, onClick?: () => void, newNodeCreationFunction? : (id : any) => any, deletionOfNodeFunction? : (id :any) => any }) {
+} : { id : any , top : any, left : any, right : any, bottom : any, onClick?: () => void, newNodeCreationFunction? : (id : any) => any, deletionOfNodeFunction? : (id :any) => void, updateBgColorOfnode? : (id : any, bgColorCode : string) => void, updatedText?: (id : any, inputText:string) => void,UpdateAddLink?: (id : any, link) => void }) {
+
+    const [inputText,setInputText] = useState("Enter the text .........")
+    const [addLink,setAddLink] = useState("")
 
     const handleNewNodeCreation = () => {
         newNodeCreationFunction(id);
@@ -31,31 +39,16 @@ export default function ContextMenu({
         deletionOfNodeFunction(id);
     }
 
-    const handleChangeOfBackgroundColor = async(bgColorCode : any) => {
-      try {
-         
-        const res = await fetch(`/api/chBgcolor/${id}`,{
-          method : "PUT",
-          headers : {
-            "Content-Type" : "application/json"
-          },
-          body : JSON.stringify({ bgcolorcode : bgColorCode })
-        })
+    const handleChangeOfBackgroundColor = async(bgColorCode : string) => {
+      updateBgColorOfnode(id,bgColorCode)
+    }
 
-        if(res.status != 200){
-           console.log(res)
-        }
+    const handleUpdateTextofNode = () => {
+      updatedText(id,inputText)
+    }
 
-        const data = await res.json()
-
-        console.log(data?.data?.message)
-
-        // pass a flag to refresh the page so that bg color changes
-        
-                
-      } catch (error) {
-        console.log(error ?? "Internal Server error")
-      }
+    const handleAddLInk = () => {
+      UpdateAddLink(id,addLink)
     }
 
   
@@ -67,8 +60,63 @@ export default function ContextMenu({
     >
       <div onClick={handleNewNodeCreation} className='pl-3 pr-3 py-1'>New Node</div>
       <div onClick={handleDeletionOfNode} className='pl-3 pr-3 py-1'>Delete</div>
-      <div className='pl-3 pr-3 py-1'>Edit text</div>
       <div className='pl-3 pr-3 py-1'>text color</div>
+      <div className='pl-3 pr-3 py-1'>
+      <Dialog >
+              <DialogTrigger asChild>
+                 <p className="cursor-pointer">Add Link</p>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle />
+                  <DialogDescription>
+                    Enter the Link....
+                  </DialogDescription>
+                </DialogHeader>
+                <div>
+                  <div>
+                    <Input
+                      id="Link"
+                      value={addLink}
+                      className="text-sm"
+                      onChange={(e) => setAddLink(e.target.value)}
+                    />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button type="submit" onClick={handleAddLInk}>Save changes</Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+      </div>
+      <div className='pl-3 pr-3 py-1'>
+      <Dialog >
+              <DialogTrigger asChild>
+                 <p className="cursor-pointer">Edit Text</p>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle />
+                  <DialogDescription>
+                    Enter the text....
+                  </DialogDescription>
+                </DialogHeader>
+                <div>
+                  <div>
+                    <Input
+                      id="name"
+                      value={inputText}
+                      className="text-sm"
+                      onChange={(e) => setInputText(e.target.value)}
+                    />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button type="submit" onClick={handleUpdateTextofNode}>Save changes</Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+      </div>
       <div className=' text-sm pl-1'> 
         <Dialog>
           <DialogTrigger asChild>
