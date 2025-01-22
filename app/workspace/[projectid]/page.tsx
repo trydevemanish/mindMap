@@ -102,8 +102,13 @@ export default function page() {
       },  
       data : {
         label : `${nodefield?.title}`
+      },
+      style: {
+        backgroundColor: nodefield?.style?.backgroundColor
       }
     }])
+
+    console.log("initialNodes",initialNodes)
 
     const initialEdges = nodeData.flatMap((nodefield : any) => {
       if(!nodefield?.parentNodeID) return []; //if no parent of a node then it mean it is root node
@@ -138,6 +143,8 @@ export default function page() {
       const data = await res.json()
 
       console.log(data?.message)
+
+      setCheckCreatedNewNode(!checkCreatedNewNode)
 
     } catch (error) {
       console.log(error ?? "Internal Server error")
@@ -180,52 +187,6 @@ export default function page() {
     }
   }
 
-
-  // updating Background Color of Node
-  async function updateBgColorOfnode(nodeid : any, bgColorCode : string) {
-    try {
-
-      const res = await fetch(`/api/changeNodePosition/${nodeid}`,{
-        method : "PUT",
-        headers : {
-          "Content-Type" : "application/json"
-        },
-        body : JSON.stringify({ bgColorCode })
-      })
-
-      if(res.status != 200){
-        console.log(res)
-      }
-
-      const data = await res.json()
-
-      console.log("Node Bg Updated",data?.data)
-
-      setNodes((nds) =>
-        nds.map((node) => {
-          if (node.id === nodeid ) {
-            // it's important that you create a new node object
-            // in order to notify react flow about the change
-            return {
-              ...node,
-              style: {
-                ...node.style,
-                backgroundColor: bgColorCode,
-              },
-            };
-          }
-   
-          return node;
-        }),
-      );
-   
-
-      setCheckBgColorChange(!checkBgColorChange)
-
-    } catch (error) {
-      console.log(error ?? "Internal server error")
-    }
-  }
 
   // program to delete the node when clicked once and delte button is pressed
   async function deleteNode(nodeid : any){
@@ -398,6 +359,9 @@ const handleNodeDragStop = (event: React.MouseEvent, node: Node) => {
   updatedNodePosition(node?.id, node?.position?.x,node?.position?.y)
 }
 
+
+
+// function to update fields 
 async function updatedNodePosition(nodeid : any, new_X :any , new_Y : any) {
   try {
 
@@ -422,10 +386,36 @@ async function updatedNodePosition(nodeid : any, new_X :any , new_Y : any) {
   }
 }
 
+// updating Background Color of Node
+async function updateBgColorOfnode(nodeid : any, bgColorCode : string) {
+  try {
 
+    // console.log("background Color code in the frontend part is ",bgColorCode);
+
+    const res = await fetch(`/api/chBgcolor/${nodeid}`,{
+      method : "PUT",
+      headers : {
+        "Content-Type" : "application/json"
+      },
+      body : JSON.stringify({ bgColorCode })
+    })
+
+    if(res.status != 200){
+      console.log(res)
+    }
+
+    const data = await res.json()
+
+    console.log("Node Bg Updated",data?.data)
+
+    setCheckBgColorChange(!checkBgColorChange)
+
+  } catch (error) {
+    console.log(error ?? "Internal server error")
+  }
+}
 
 // async function to update text 
-
 async function updatedText(nodeid :any, updatedText :string){
   try {
 

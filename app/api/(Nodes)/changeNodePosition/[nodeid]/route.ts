@@ -11,12 +11,6 @@ export async function PUT(req:Request,{params} : { params : any }) {
 
         const { new_X, new_Y }  = await req.json()
 
-        console.log("test 1")
-
-        console.log("Node Position of x, y", new_X, new_Y)
-
-        console.log("test 2")
-
         const movedPosition = await nodeModel.findByIdAndUpdate(
             nodeid,
             {

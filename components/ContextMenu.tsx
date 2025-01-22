@@ -39,7 +39,7 @@ export default function ContextMenu({
         deletionOfNodeFunction(id);
     }
 
-    const handleChangeOfBackgroundColor = async(bgColorCode : string) => {
+    const handleChangeOfBackgroundColor = (bgColorCode : string) => {
       updateBgColorOfnode(id,bgColorCode)
     }
 

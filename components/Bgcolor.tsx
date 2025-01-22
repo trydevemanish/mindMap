@@ -1,13 +1,13 @@
 const BgColorList = [
     {
         bgColor_id : 1,
-        bgColorName : "color 1",
-        bgColorCode : '#EF6444'
+        bgColorName : "Moccasin",
+        bgColorCode : '#FFE4B5'
     },
     {
         bgColor_id : 2,
-        bgColorName : "color 2",
-        bgColorCode : '#FAA31B'
+        bgColorName : "PeachPuff",
+        bgColorCode : '#FFDAB9'
     },
     {
         bgColor_id : 3,
