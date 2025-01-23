@@ -58,9 +58,8 @@ export default function ContextMenu({
       className="context-menu flex-col justify-center items-center"
       {...props}
     >
-      <div onClick={handleNewNodeCreation} className='pl-3 pr-3 py-1'>New Node</div>
-      <div onClick={handleDeletionOfNode} className='pl-3 pr-3 py-1'>Delete</div>
-      <div className='pl-3 pr-3 py-1'>text color</div>
+      <div onClick={handleNewNodeCreation} className='cursor-pointer pl-3 pr-3 py-1'>New Node</div>
+      <div onClick={handleDeletionOfNode} className='cursor-pointer pl-3 pr-3 py-1'>Delete</div>
       <div className='pl-3 pr-3 py-1'>
       <Dialog >
               <DialogTrigger asChild>
@@ -132,7 +131,8 @@ export default function ContextMenu({
               {Array.isArray(BgColorList) && BgColorList.map((bgcolorfields : any, idx :any) => (
                 <p 
                     key={bgcolorfields?.bgColor_id} 
-                    className='cursor-pointer' 
+                    className='cursor-pointer text-sm border-b px-2 opacity-70'
+                    style={{ borderColor : bgcolorfields?.bgColorCode }} 
                     onClick={() => handleChangeOfBackgroundColor(bgcolorfields?.bgColorCode)}
                 >
                   {bgcolorfields?.bgColorName}

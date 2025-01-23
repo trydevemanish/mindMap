@@ -1,5 +1,6 @@
 "use client"
-
+import { Star } from "lucide-react"
+import React from "react"
 import { useEffect, useState } from "react"
 import { Button } from "../components/ui/button"
 import {
@@ -14,145 +15,356 @@ import {
 import { Input } from "../components/ui/input"
 import { Label } from "../components/ui/label"
 import { useRouter } from "next/navigation"
-import React from "react"
+
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu"
+
+
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 export default function Home() {
-
   const [projectdata, setProjectData] = useState([])
   const [projectName,setProjectName] = useState("")
   const [description,setdescription] = useState("")
 
-  const router = useRouter()
+  const [newProjectCreated,setNewProjectCreated] = useState(false)
+  const [projectDeleted,setProjectDeletd] = useState(false);
+  const [updatingProjectName,setUpdatingProjectName] = useState(false)
+  const [darkTheme,setDarkTheme] = useState("")
 
-  // fetch all the project details
-  useEffect(() => {
-    async function fetchProjectDetail(){
+  
+    const router = useRouter()
+
+    // fetch all the project details
+    useEffect(() => {
+        async function fetchProjectDetail(){
+          try {
+    
+            const res = await fetch("/api/fetchProject")
+    
+            if(res.status != 200){
+              console.log(res)
+            }
+    
+            const data = await res.json()
+
+            console.log(data?.message)
+            console.log(data)
+
+            setProjectData(data?.data)
+            
+          } catch (error) {
+            console.log(error ?? "Server Internal issue")
+          }
+        }
+        fetchProjectDetail()
+    },[newProjectCreated,projectDeleted,updatingProjectName])
+
+
+    // create a new Project 
+    async function createProject(){
       try {
 
-        const res = await fetch("/api/fetchProject")
-
-        if(res.status != 200){
-           console.log(res)
+        const res = await fetch("/api/createProject",{
+          method : "POST",
+          headers : {
+            "Content-Type" : "application/json"
+          },
+          body : JSON.stringify({ projectName, description })
+        })
+    
+        if(res.status != 201){
+          console.log(res ?? "failed to Create")
         }
 
         const data = await res.json()
 
-        setProjectData(data?.data)
+        console.log(data?.message)
+
+        setNewProjectCreated(!newProjectCreated)
+                
+      } catch (error) {
+        console.log(error ?? "Inter Server Issue")
+      }
+    }
+
+    // delete a Project
+    async function deleteProject(projectid : string) {
+       try {
+
+        const res = await fetch(`/api/deleteProject/${projectid}`,{
+          method : "DELETE"
+        })
+
+        if(res.status != 200){
+          console.log(res)
+        }
+
+        const data = await res.json()
+
+        console.log(data?.message)
+
+        setProjectDeletd(!projectDeleted)
+        
+       } catch (error) {
+          console.log(error ?? "Inter Server Issue")
+       }
+    }
+
+    // update Project Name 
+    async function updateProjectName(projectid:string,newProjectName : string) {
+      try {
+
+        const res = await fetch(`/api/changeProjectName/${projectid}`,{
+          method : "PUT",
+          headers : {
+            "Content-Type" : "application/json"
+          },
+          body : JSON.stringify({ newProjectName })
+        })
+
+        if(res.status != 200){
+          console.log(res)
+        }
+
+        const data = await res.json()
+
+        console.log(data?.message)
+
+        setUpdatingProjectName(!updatingProjectName)
         
       } catch (error) {
-        console.log(error ?? "Server Internal issue")
+        console.log(error ?? "Internal Server Error")
       }
     }
-    fetchProjectDetail()
-  },[])
 
-  // cretae a new Project 
-  async function createProject(){
-    try {
-
-      const res = await fetch("/api/createProject",{
-        method : "POST",
-        headers : {
-          "Content-Type" : "application/json"
-        },
-        body : JSON.stringify({ projectName, description })
-      })
+    function makeShort(text : string,minlen : number){
+      if(minlen >= text.length){
+        return text
+      }
   
-      if(res.status != 201){
-        console.log(res ?? "failed to Create")
+      return text.slice(0,minlen)+"..."
+    }
+
+
+    function moveToworkflow(projectID : string){
+      //  router.replace(`/workspace/${projectID}`)
+      router.push(`/workspace/${projectID}`)
+    }
+
+    const handleThemeFormat = (theme : 'dark' | 'light') => {
+      if(theme === 'dark'){
+        setDarkTheme(theme)
+      } else {
+        setDarkTheme(theme)
       }
-
-      console.log("res",res)
-      
-    } catch (error) {
-      console.log(error ?? "Inter Server Issue")
-    }
-  }
-
-  function makeShort(text : string,minlen : number){
-
-    if(minlen >= text.length){
-      return text
     }
 
-    return text.slice(0,minlen)+"..."
-  }
 
-  function moveToworkflow(projectID : string){
-    //  router.replace(`/workspace/${projectID}`)
-    router.push(`/workspace/${projectID}`)
-  }
+  return(
+    <main className={`${darkTheme == 'dark' ? 'dark' : 'light'}`}>
+      <div className="grid grid-cols-[16vw_1fr] min-h-screen overflow-hidden dark:border-white dark:text-white dark:bg-black">
 
-    return (
-      <div className="min-h-screen">
-        <h1 className="text-center pt-5 text-2xl">Project <span className="bg-yellow-300 px-1 ">details</span></h1>
-        <div className="flex-col justify-center">
-            <div className='flex gap-16 justify-center pt-10 border-b border-black'>
-              <p>Index</p>
-              <p>Project Name</p>
-              <p>Project Desc..</p>
-              <p>created At</p> 
+          {/* sidebar part  */}
+          <div className="min-h-screen border-r dark:border-white border-black text-sm px-4 py-3">
+            {/* <h2 className="border-b px-2 py-1">Templates</h2>
+            <div className="flex flex-col pl-3 pt-2 pb-2 pr-3 gap-2">
+              <p className="cursor-pointer">Template 1</p>
+              <p className="cursor-pointer">Template 2</p>
+            </div> */}
+            <div className="bg-purple-100 cursor-pointer rounded my-2 self-center flex justify-center">
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <button className="px-2 py-1 opacity-85 self-center dark:text-black">New Project</button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                      <DialogTitle className="text-base">Create Project.</DialogTitle>
+                      <DialogDescription className="opacity-70 text-sm">
+                        Enter the project name and description.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                      <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="Project Name" className="text-right">
+                          Project name
+                        </Label>
+                        <Input
+                          id="Project Name"
+                          className="col-span-3 text-sm"
+                          value={projectName}
+                          onChange={(e) => setProjectName(e.target.value)}
+                        />
+                      </div>
+                      <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="description" className="text-right">
+                          Description
+                        </Label>
+                        <textarea
+                          id="description"
+                          className="col-span-3 px-2 py-1 text-sm border border-black rounded-md"
+                          value={description}
+                          onChange={(e) => setdescription(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                    <DialogFooter>
+                      <Button type="submit" onClick={createProject}>Create</Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+            </div>
+            <p className="flex opacity-40 items-center border-b bg-violet-100 rounded py-1 cursor-pointer justify-center gap-1">
+              <span className="dark:text-black opacity-75">Generate with AI</span>
+              <span><Star size={10} /></span>
+            </p>
+          </div>
+
+          {/* Main part  */}
+          <div className="min-h-screen px-4">
+
+            <div className="flex justify-between items-center border-b py-1">
+              <p className="text-sm">Generate Your Mindmap</p>
+              <div>
+                <Select onValueChange={handleThemeFormat}>
+                  <SelectTrigger className="w-[100px]">
+                    <SelectValue className='placeholder:text-xs' placeholder={"Theme"}/>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup >
+                      <SelectItem value="dark" className='text-xs cursor-pointer'>Dark</SelectItem>
+                      <SelectItem value="light" className='text-xs cursor-pointer'>Light</SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
-            {projectdata ? (
-              <div>
-              {projectdata.map((projectdatafeild : any,idx : number) => (
-                <div className="flex border-b border-black gap-20 cursor-pointer text-sm justify-center pt-5" key={idx} onClick={() => moveToworkflow(projectdatafeild?._id)}>
-                    <p>{idx}</p>
-                    <p>{projectdatafeild?.projectName}</p>
-                    <p>{makeShort(projectdatafeild?.description,15) ?? "-"}</p>
-                    <p>{projectdatafeild?.created_At ?? "-"}</p>
-                </div>
-                ))}
+            <div>
+              {/* fetched data layout  */}
+              <div className='flex justify-around pt-7 border-b opacity-70 text-sm'>
+                  <p>Index</p>
+                  <p>Project Name</p>
+                  <p>Project Description</p>
+                  <p>created At</p> 
               </div>
-            ) :
-            (
-              <div>
-                <p>No Previous Project! , Create a new one.</p>
-              </div>
-            )}
 
-          <div className="flex justify-center pt-5">
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button variant="outline">Create Project</Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                  <DialogTitle>Edit profile</DialogTitle>
-                  <DialogDescription>
-                    Make changes to your profile here. Click save when you're done.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="name" className="text-right">
-                      Name
-                    </Label>
-                    <Input
-                      id="name"
-                      defaultValue="Pedro Duarte"
-                      className="col-span-3"
-                    />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="username" className="text-right">
-                      Username
-                    </Label>
-                    <Input
-                      id="username"
-                      defaultValue="@peduarte"
-                      className="col-span-3"
-                    />
+              {/* showing project data result  */}
+              {projectdata.length != 0 ? (
+                <div>
+                  {projectdata.map((projectdatafeild : any,idx : number) => (
+                    <ContextMenu key={idx}>
+                      <ContextMenuTrigger>
+                        <div className="flex justify-around pt-5 border-b cursor-pointer opacity-85 text-sm"  onClick={() => moveToworkflow(projectdatafeild?._id)}>
+                            <p>{idx}</p>
+                            <p>{projectdatafeild?.projectName}</p>
+                            <p>{makeShort(projectdatafeild?.description,15) ?? "-"}</p>
+                            <p>{projectdatafeild?.created_At ?? "-"}</p>
+                        </div>
+                      </ContextMenuTrigger>
+                      <ContextMenuContent>
+                        {/* for updating the project name  */}
+                        <ContextMenuItem> 
+                          <Dialog>
+                            <DialogTrigger asChild>
+                            <button className="opacity-85 self-center" onClick={(e) => e.stopPropagation()}>Change Project Name</button>
+                            </DialogTrigger>
+                            <DialogContent className="sm:max-w-[425px]">
+                              <DialogHeader>
+                                <DialogTitle className="text-base">Update Project Name..</DialogTitle>
+                                <DialogDescription className="opacity-70 text-sm">
+                                  Enter the new project name to be updated.
+                                </DialogDescription>
+                              </DialogHeader>
+                              <div className="grid gap-4 py-4">
+                                <div className="grid grid-cols-4 items-center gap-4">
+                                  <Label htmlFor="Project Name" className="text-right">
+                                    New Project name
+                                  </Label>
+                                  <Input
+                                    id="Project Name"
+                                    className="col-span-3 text-sm"
+                                    value={projectName}
+                                    onChange={(e) => setProjectName(e.target.value)}
+                                  />
+                                </div>
+                              </div>
+                              <DialogFooter>
+                                <Button type="submit" onClick={() => updateProjectName(projectdatafeild?._id,projectName)}>Update</Button>
+                              </DialogFooter>
+                            </DialogContent>
+                          </Dialog>
+                        </ContextMenuItem>
+                        {/* for deleting the Project */}
+                        <ContextMenuItem onClick={() => deleteProject(projectdatafeild?._id)}>Delete Project</ContextMenuItem>
+                      </ContextMenuContent>
+                    </ContextMenu>
+                  ))}
+                </div>
+              ) :
+              (
+                <div className="opacity-50 flex flex-col item-center pt-20 text-sm">
+                  <p className="text-center">No Project created yet.</p>
+                  <div className="bg-purple-100 rounded self-center">
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button variant="outline" className="bg-purple-100 rounded self-center">Create one..</Button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-[425px]">
+                          <DialogHeader>
+                            <DialogTitle className="text-base">Create Project.</DialogTitle>
+                            <DialogDescription className="opacity-70 text-sm">
+                              Enter the project name and description.
+                            </DialogDescription>
+                          </DialogHeader>
+                          <div className="grid gap-4 py-4">
+                            <div className="grid grid-cols-4 items-center gap-4">
+                              <Label htmlFor="Project Name" className="text-right">
+                                Project name
+                              </Label>
+                              <Input
+                                id="Project Name"
+                                className="col-span-3 text-sm"
+                                value={projectName}
+                                onChange={(e) => setProjectName(e.target.value)}
+                              />
+                            </div>
+                            <div className="grid grid-cols-4 items-center gap-4">
+                              <Label htmlFor="description" className="text-right">
+                                Description
+                              </Label>
+                              <textarea
+                                id="description"
+                                className="col-span-3 px-2 py-1 text-sm border border-black rounded-md"
+                                value={description}
+                                onChange={(e) => setdescription(e.target.value)}
+                              />
+                            </div>
+                          </div>
+                          <DialogFooter>
+                            <Button type="submit" onClick={createProject}>Create</Button>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
                   </div>
                 </div>
-                <DialogFooter>
-                  <Button type="submit">Save changes</Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
+              )}
+
+            </div>
           </div>
-        </div>
+
       </div>
-    )
-  }
+    </main>
+  )
+} 

@@ -30,7 +30,6 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
@@ -59,7 +58,7 @@ export default function page() {
   const [checkBgColorChange,setCheckBgColorChange] = useState(false);
   const [checktextUpdated,setCheckTextUpdated] = useState(false);
 
-  const [ parentNodePosition,setParentNodePosition] = useState<Position>({ x : 400 , y : 50 });
+  const [ parentNodePosition,setParentNodePosition] = useState<Position>({ x : 396.00 , y : 162.00 });
   const { projectid } = useParams()
 
 
@@ -514,12 +513,17 @@ async function UpdateAddLink(nodeid : any,link:string) {
 
   return (
     <div style={{ width: '100vw', height: '100vh' }}>
-        <div>
+        <div className='absolute right-8 z-10'>
           {/* this div part is for download part  */}
           <div className='pt-3 px-6 flex justify-end gap-8 z-50'>
               <Select onValueChange={handleDownloadFormat}>
                 <SelectTrigger className="w-[80px]">
-                  <SelectValue className='placeholder:text-xs' placeholder={<div className='flex gap-2 items-center'><DownloadCloud size={15} /><span className='text-xs'>as</span></div>}/>
+                  <SelectValue className='placeholder:text-xs' placeholder={
+                    <div className='flex gap-2'>
+                      <DownloadCloud size={15} />
+                      <span className='text-xs'>as</span>
+                    </div>
+                  }/>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup >
@@ -532,7 +536,10 @@ async function UpdateAddLink(nodeid : any,link:string) {
               <div>
                   <Dialog>
                     <DialogTrigger asChild onClick={constructShareUrl}>
-                      <Button variant="outline" className='px-3 py-1'>{<Share2Icon size={12} />}</Button>
+                      <button className='flex rounded border px-4 py-2 gap-1 items-center justify-center'>
+                        <span className='text-xs cursor-pointer'>Share</span>
+                        <Share2Icon size={13} />
+                      </button>
                     </DialogTrigger>
                     <DialogContent className="sm:max-w-[425px]">
                       <DialogHeader>
@@ -541,7 +548,7 @@ async function UpdateAddLink(nodeid : any,link:string) {
                           Give Permission to make changes.
                         </DialogDescription>
                       </DialogHeader>
-                      <div className="grid gap-4 py-4">
+                      <div className="grid gap-2 py-4">
                         <div>
                           <Input
                             id="name"
@@ -549,15 +556,6 @@ async function UpdateAddLink(nodeid : any,link:string) {
                             value={shareInput}
                             onChange={(e) => setShareInput(e.target.value)}
                           />
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Checkbox id="terms" />
-                          <label
-                            htmlFor="terms"
-                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                          >
-                            User can make changes (default *no*).
-                          </label>
                         </div>
                       </div>
                       <DialogFooter>

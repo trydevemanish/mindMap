@@ -1,48 +1,48 @@
 const BgColorList = [
     {
         bgColor_id : 1,
-        bgColorName : "Moccasin",
-        bgColorCode : '#FFE4B5'
+        bgColorName : "Plum 3",
+        bgColorCode : '#C38EC7'
     },
     {
         bgColor_id : 2,
-        bgColorName : "PeachPuff",
-        bgColorCode : '#FFDAB9'
+        bgColorName : "Thistle",
+        bgColorCode : '#D2B9D3'
     },
     {
         bgColor_id : 3,
-        bgColorName : "color 3",
-        bgColorCode : '#FFF000'
+        bgColorName : "Lavender Blush 3",
+        bgColorCode : '#CBBBBE'
     },
     {
         bgColor_id : 4,
-        bgColorName : "color 4",
-        bgColorCode : '£23422'
+        bgColorName : "Thistle 1",
+        bgColorCode : '#FCDFFF'
     },
     {
         bgColor_id : 5,
-        bgColorName : "E",
-        bgColorCode : '£23422'
+        bgColorName : "Light Steel Blue 1",
+        bgColorCode : '#C6dEFF'
     },
     {
         bgColor_id : 6,
-        bgColorName : "F",
-        bgColorCode : '£23422'
+        bgColorName : "Light Cyan",
+        bgColorCode : '#E0FFFF'
     },
     {
         bgColor_id : 7,
-        bgColorName : "G",
-        bgColorCode : '£23422'
+        bgColorName : "Slate Gray 2",
+        bgColorCode : '#B4CFEC'
     },
     {
         bgColor_id : 8,
-        bgColorName : "H",
-        bgColorCode : '£23422'
+        bgColorName : "Cyan",
+        bgColorCode : '#00FFFF'
     },
     {
         bgColor_id : 9,
-        bgColorName : "I",
-        bgColorCode : '£23422'
+        bgColorName : "Voilet Red",
+        bgColorCode : '#F635BA'
     }
 ]
 
