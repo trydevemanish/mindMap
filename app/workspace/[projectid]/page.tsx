@@ -38,8 +38,8 @@ import '@xyflow/react/dist/style.css';
 import { Node,Edge } from "@xyflow/react"
 import ContextMenu from '@/components/ContextMenu';
 import { Menu,Position } from '@/types/types';
-import html2pdf from "html2pdf.js"
 import { getURL } from 'next/dist/shared/lib/utils';
+import puppeteer from "puppeteer"
 
 
 export default function page() { 
@@ -292,26 +292,65 @@ const onNodeContextMenu = useCallback(
 const onPaneClick = useCallback(() => setMenu(null), [setMenu]);
 
 // function to download the file 
+// async function downloadInPdfFormat(){
+//   if (typeof window !== 'undefined') {
+//     const element = document.querySelector('.react-flow');
+
+//     if(!element){
+//       console.error("React flow container not found")
+//       return;
+//     }
+
+//     console.log(element.innerHTML);
+
+//     const html2pdf = (await import('html2pdf.js')).default;
+
+//     const opt = {
+//       margin: [0.5, 0.5],
+//       filename: 'mindmap.pdf',
+//       image: { type: 'jpeg', quality: 0.98 },
+//       html2canvas: { 
+//         scale: 3,
+//         useCORS : true,
+//         logging : true
+//       },
+//       jsPDF: { unit: 'in', format: 'letter', orientation: 'landscape' },
+//     };
+
+//     try {
+//       await html2pdf().set(opt).from(element).save();
+//     } catch (error) {
+//       console.error('PDF generation failed:', error);
+//     }
+//   }
+// }
+
 async function downloadInPdfFormat(){
-  if (typeof window !== 'undefined') {
-    const element = document.querySelector('.react-flow');
-    const html2pdf = (await import('html2pdf.js')).default;
+  try {
 
-    const opt = {
-      margin: 1,
-      filename: 'mindmap.pdf',
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2 },
-      jsPDF: { unit: 'in', format: 'letter', orientation: 'landscape' },
-    };
+    const res = await fetch("/api/genereatePdf");
 
-    try {
-      await html2pdf().set(opt).from(element).save();
-    } catch (error) {
-      console.error('PDF generation failed:', error);
+    if(!res.ok){
+      console.log("Failed to generate PDF")
     }
+
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+
+    console.log("url",url)
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'mindmap.pdf';
+    document.body.appendChild(link);  
+    link.click();
+    document.body.removeChild(link);
+    
+  } catch (error) {
+    console.error('PDF generation failed:', error);
   }
 }
+
 
 const convertToMarkdown = (nodes: Node[]) => {
   let markdown = `# ${nodes[0]?.data?.label || 'Mind Map'}\n\n`;
@@ -353,6 +392,7 @@ async function constructShareUrl(){
   setShareInput(constructedUrl);
 }
 
+// function to handle node drag and adjust aw to position
 const handleNodeDragStop = (event: React.MouseEvent, node: Node) => {
   console.log("node id which is moved",node?.id)
   updatedNodePosition(node?.id, node?.position?.x,node?.position?.y)

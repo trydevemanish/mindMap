@@ -266,7 +266,7 @@ export default function Home() {
                   {projectdata.map((projectdatafeild : any,idx : number) => (
                     <ContextMenu key={idx}>
                       <ContextMenuTrigger>
-                        <div className="flex justify-around pt-5 border-b cursor-pointer opacity-85 text-sm"  onClick={() => moveToworkflow(projectdatafeild?._id)}>
+                        <div className="flex justify-around pt-5 border-b cursor-pointer opacity-85 text-[0.8rem]"  onClick={() => moveToworkflow(projectdatafeild?._id)}>
                             <p>{idx}</p>
                             <p>{projectdatafeild?.projectName}</p>
                             <p>{makeShort(projectdatafeild?.description,15) ?? "-"}</p>
