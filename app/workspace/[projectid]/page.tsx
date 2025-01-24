@@ -292,39 +292,6 @@ const onNodeContextMenu = useCallback(
 const onPaneClick = useCallback(() => setMenu(null), [setMenu]);
 
 // function to download the file 
-// async function downloadInPdfFormat(){
-//   if (typeof window !== 'undefined') {
-//     const element = document.querySelector('.react-flow');
-
-//     if(!element){
-//       console.error("React flow container not found")
-//       return;
-//     }
-
-//     console.log(element.innerHTML);
-
-//     const html2pdf = (await import('html2pdf.js')).default;
-
-//     const opt = {
-//       margin: [0.5, 0.5],
-//       filename: 'mindmap.pdf',
-//       image: { type: 'jpeg', quality: 0.98 },
-//       html2canvas: { 
-//         scale: 3,
-//         useCORS : true,
-//         logging : true
-//       },
-//       jsPDF: { unit: 'in', format: 'letter', orientation: 'landscape' },
-//     };
-
-//     try {
-//       await html2pdf().set(opt).from(element).save();
-//     } catch (error) {
-//       console.error('PDF generation failed:', error);
-//     }
-//   }
-// }
-
 async function downloadInPdfFormat(){
   try {
 
@@ -352,29 +319,37 @@ async function downloadInPdfFormat(){
 }
 
 
-const convertToMarkdown = (nodes: Node[]) => {
-  let markdown = `# ${nodes[0]?.data?.label || 'Mind Map'}\n\n`;
+const convertToMarkdown = (nodeData : any) => {
 
-   const buildMarkdownTree = (nodeId: string, level: number) => {
-    const node = nodes.find(n => n.id === nodeId);
-    if(!node) return;
+  if (!nodeData || nodeData.length === 0) return '';
+  const rootNode = nodeData.find((node : any) => node?.parentNodeID === null)
+  if(!rootNode){
+    console.error("No Root Node")
+  }
 
-    markdown += `${'  '.repeat(level)}* ${node.data.label}\n`;
+  let markdown = `# ${rootNode.title}\n\n`
 
-    const childNodes = nodes.filter(n => n.data.parentNodeID === node.id);
-    childNodes.forEach(child => buildMarkdownTree(child.id, level + 1));
-   }
+  const buildMarkdownTree = (node: any, level: number) => {
+    const childID  = node?.childNodeID || [];
+    const childrenNode = nodeData.filter((n : any) => childID.includes(n._id))
 
-   buildMarkdownTree(nodes[0]?.id, 0);
-   return markdown
-
+    childrenNode.forEach((child : any) => {
+      markdown += `${'  '.repeat(level)}- ${child?.title}\n`
+      buildMarkdownTree(child, level + 1);
+    })
+  }
+  buildMarkdownTree(rootNode, 1);
+  console.log(markdown)
+  return markdown;
 }
+
+
 
 const handleDownloadFormat = (format : 'pdf' | 'markdown') => {
   if(format === 'pdf'){
     downloadInPdfFormat()
   } else {
-    const markdown = convertToMarkdown(nodes);
+    const markdown = convertToMarkdown(nodeData);
     const blob = new Blob([markdown], { type: 'text/markdown' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
