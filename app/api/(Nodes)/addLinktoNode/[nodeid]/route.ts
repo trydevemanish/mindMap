@@ -2,7 +2,7 @@ import { nodeModel } from "@/model/nodes";
 import { connectDb } from "@/connections/connectDb";
 import { NextResponse } from "next/server";
 
-async function PUT(req:Request,{ params } : { params : any }) {
+export async function PUT(req:Request,{ params } : { params : any }) {
     try {
 
         await connectDb()

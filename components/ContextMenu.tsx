@@ -1,3 +1,4 @@
+"use client"
 import React, { useCallback, useState } from 'react';
 import { Button } from "@/components/ui/button"
 import {
@@ -10,8 +11,10 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { BgColorList } from "@/components/Bgcolor"
-import { Label } from '@radix-ui/react-label';
 import { Input } from '@/components/ui/input';
+import { getURL } from 'next/dist/shared/lib/utils';
+import { Loader2 } from 'lucide-react';
+
  
 export default function ContextMenu({
   id,
@@ -20,16 +23,37 @@ export default function ContextMenu({
   right,
   bottom,
   onClick,
+  buttonStateChecker,
   newNodeCreationFunction,
   deletionOfNodeFunction,
   updateBgColorOfnode,
   updatedText,
   UpdateAddLink,
+  deleteAllNodes,
+  handleFindNodeUrlLink,
   ...props
-} : { id : any , top : any, left : any, right : any, bottom : any, onClick?: () => void, newNodeCreationFunction? : (id : any) => any, deletionOfNodeFunction? : (id :any) => void, updateBgColorOfnode? : (id : any, bgColorCode : string) => void, updatedText?: (id : any, inputText:string) => void,UpdateAddLink?: (id : any, link) => void }) {
+} : { 
+    id : any ,
+    top : any,
+    left : any,
+    right : any, 
+    bottom : any, 
+    onClick?: () => void, 
+    buttonStateChecker : boolean,
+    newNodeCreationFunction? : (id : any) => any, 
+    deletionOfNodeFunction? : (id :any) => void, 
+    updateBgColorOfnode? : (id : any, 
+    bgColorCode? : string) => void, 
+    updatedText?: (id : any, inputText:string) => void,
+    UpdateAddLink?: (id : any, link : any) => void, 
+    deleteAllNodes?: (id : any) => void, 
+    handleFindNodeUrlLink?: (id : any) => void,
+  }) {
 
     const [inputText,setInputText] = useState("Enter the text .........")
-    const [addLink,setAddLink] = useState("")
+    const [addLink,setAddLink] = useState("Ex like- google.com")
+    const [stateButtonLoaded,setStateButtonLoaded] = useState(false)
+    
 
     const handleNewNodeCreation = () => {
         newNodeCreationFunction(id);
@@ -51,16 +75,27 @@ export default function ContextMenu({
       UpdateAddLink(id,addLink)
     }
 
+    const handleDeleteAllNodes = () => {
+      const projectId = getURL().split("/")
+      deleteAllNodes(projectId[2])
+    }
+
+    const handleOpenLink = () => {
+      handleFindNodeUrlLink(id)
+    }
+
   
   return (
     <div
       style={{ top, left, right, bottom }}
-      className="context-menu flex-col justify-center items-center"
+      className="context-menu px-2 rounded py-3 w-40 flex-col justify-center items-center"
       {...props}
     >
-      <div onClick={handleNewNodeCreation} className='cursor-pointer pl-3 pr-3 py-1'>New Node</div>
-      <div onClick={handleDeletionOfNode} className='cursor-pointer pl-3 pr-3 py-1'>Delete</div>
-      <div className='pl-3 pr-3 py-1'>
+      <div onClick={handleNewNodeCreation} className='cursor-pointer pl-3 pr-3 pt-1 pb-2 hover:bg-zinc-50 hover:rounded'>New Node</div>
+      <div onClick={handleDeletionOfNode} className='cursor-pointer pl-3 pr-3 pb-2 hover:bg-zinc-50 hover:rounded'>Delete</div>
+      <div onClick={handleDeleteAllNodes} className='cursor-pointer pl-3 pr-3 pb-2 hover:bg-zinc-50 hover:rounded'>Delete All Nodes</div>
+      <div onClick={handleOpenLink} className='cursor-pointer pl-3 pr-3 pb-2 hover:bg-zinc-50 hover:rounded'>Open Link</div>
+      <div className='pl-3 pr-3 pb-2 hover:bg-zinc-50 hover:rounded'>
       <Dialog >
               <DialogTrigger asChild>
                  <p className="cursor-pointer">Add Link</p>
@@ -83,12 +118,14 @@ export default function ContextMenu({
                   </div>
                 </div>
                 <DialogFooter>
-                  <Button type="submit" onClick={handleAddLInk}>Save changes</Button>
+                  <Button type="submit" onClick={handleAddLInk} className="pl-16 pr-16"> 
+                              {buttonStateChecker === true ? <Loader2 size={12} className="animate-spin"/> : "Save changes"}
+                  </Button>
                 </DialogFooter>
               </DialogContent>
             </Dialog>
       </div>
-      <div className='pl-3 pr-3 py-1'>
+      <div className='pl-3 pr-3 pb-2 hover:bg-zinc-50 hover:rounded'>
       <Dialog >
               <DialogTrigger asChild>
                  <p className="cursor-pointer">Edit Text</p>
@@ -111,15 +148,17 @@ export default function ContextMenu({
                   </div>
                 </div>
                 <DialogFooter>
-                  <Button type="submit" onClick={handleUpdateTextofNode}>Save changes</Button>
+                  <Button type="submit" onClick={handleUpdateTextofNode} className="pl-16 pr-16 "> 
+                              {buttonStateChecker === true ? <Loader2 size={12} className="animate-spin"/> : "Save changes"}
+                  </Button>
                 </DialogFooter>
               </DialogContent>
             </Dialog>
       </div>
-      <div className=' text-sm pl-1'> 
+      <div className='pl-3 pb-1 hover:bg-zinc-50 hover:rounded'> 
         <Dialog>
           <DialogTrigger asChild>
-            <button>Change Bg</button>
+            <p className='cursor-pointer'>Change Bg</p>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[300px]">
             <DialogHeader>

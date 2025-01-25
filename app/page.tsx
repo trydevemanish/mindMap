@@ -3,6 +3,7 @@ import { Star } from "lucide-react"
 import React from "react"
 import { useEffect, useState } from "react"
 import { Button } from "../components/ui/button"
+import { Loader2 } from "lucide-react"
 import {
   Dialog,
   DialogContent,
@@ -15,6 +16,7 @@ import {
 import { Input } from "../components/ui/input"
 import { Label } from "../components/ui/label"
 import { useRouter } from "next/navigation"
+import { useToast } from "@/hooks/use-toast"
 
 import {
   ContextMenu,
@@ -42,8 +44,9 @@ export default function Home() {
   const [projectDeleted,setProjectDeletd] = useState(false);
   const [updatingProjectName,setUpdatingProjectName] = useState(false)
   const [darkTheme,setDarkTheme] = useState("")
+  const [stateButtonLoaded,setStateButtonLoaded] = useState(false)
 
-  
+    const { toast } = useToast()
     const router = useRouter()
 
     // fetch all the project details
@@ -59,9 +62,6 @@ export default function Home() {
     
             const data = await res.json()
 
-            console.log(data?.message)
-            console.log(data)
-
             setProjectData(data?.data)
             
           } catch (error) {
@@ -75,6 +75,8 @@ export default function Home() {
     // create a new Project 
     async function createProject(){
       try {
+
+        setStateButtonLoaded(true)
 
         const res = await fetch("/api/createProject",{
           method : "POST",
@@ -90,12 +92,17 @@ export default function Home() {
 
         const data = await res.json()
 
-        console.log(data?.message)
-
         setNewProjectCreated(!newProjectCreated)
+
+        toast({
+          title : data?.message,
+          className:"w-[300px] text-sm font-light"
+        }) 
+
+        setStateButtonLoaded(false)
                 
       } catch (error) {
-        console.log(error ?? "Inter Server Issue")
+        console.log(error ?? "Internal Server Issue")
       }
     }
 
@@ -116,6 +123,11 @@ export default function Home() {
         console.log(data?.message)
 
         setProjectDeletd(!projectDeleted)
+
+        toast({
+          title : data?.message,
+          className:"w-[300px] text-sm font-light"
+        })
         
        } catch (error) {
           console.log(error ?? "Inter Server Issue")
@@ -142,12 +154,18 @@ export default function Home() {
 
         console.log(data?.message)
 
+        toast({
+          title : data?.message,
+          className:"w-[300px] text-sm font-light"
+        })
+
         setUpdatingProjectName(!updatingProjectName)
         
       } catch (error) {
         console.log(error ?? "Internal Server Error")
       }
     }
+
 
     function makeShort(text : string,minlen : number){
       if(minlen >= text.length){
@@ -165,8 +183,16 @@ export default function Home() {
 
     const handleThemeFormat = (theme : 'dark' | 'light') => {
       if(theme === 'dark'){
+        toast({
+          title : `Theme Switched to ${theme}`,
+          className:"w-[300px] text-sm font-thin"
+        })
         setDarkTheme(theme)
       } else {
+        toast({
+          title : `Theme Switched to ${theme}`,
+          className:"w-[300px] text-sm font-light"
+        })
         setDarkTheme(theme)
       }
     }
@@ -220,7 +246,9 @@ export default function Home() {
                       </div>
                     </div>
                     <DialogFooter>
-                      <Button type="submit" onClick={createProject}>Create</Button>
+                      <Button type="submit" onClick={createProject} className="pl-10 pr-10 "> 
+                                {stateButtonLoaded === true ? <Loader2 size={12} className="animate-spin"/> : "Create"}
+                      </Button>
                     </DialogFooter>
                   </DialogContent>
                 </Dialog>
@@ -319,7 +347,7 @@ export default function Home() {
                   <div className="bg-purple-100 rounded self-center">
                       <Dialog>
                         <DialogTrigger asChild>
-                          <Button variant="outline" className="bg-purple-100 rounded self-center">Create one..</Button>
+                          <Button variant="outline" className="bg-purple-100 rounded self-center dark:bg-purple-200 dark:text-black">Create one..</Button>
                         </DialogTrigger>
                         <DialogContent className="sm:max-w-[425px]">
                           <DialogHeader>
@@ -353,7 +381,9 @@ export default function Home() {
                             </div>
                           </div>
                           <DialogFooter>
-                            <Button type="submit" onClick={createProject}>Create</Button>
+                            <Button type="submit" onClick={createProject} className="pl-10 pr-10 "> 
+                              {stateButtonLoaded === true ? <Loader2 size={12} className="animate-spin"/> : "Create"}
+                            </Button>
                           </DialogFooter>
                         </DialogContent>
                       </Dialog>

@@ -22,8 +22,6 @@ import {
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Checkbox } from "@/components/ui/checkbox"
 
 import {
   Select,
@@ -40,7 +38,8 @@ import ContextMenu from '@/components/ContextMenu';
 import { Menu,Position } from '@/types/types';
 import { getURL } from 'next/dist/shared/lib/utils';
 import puppeteer from "puppeteer"
-
+import { useToast } from "@/hooks/use-toast"
+import { useRouter } from 'next/router';  
 
 export default function page() { 
   const [nodeData,setNodeData] = useState([]);
@@ -50,16 +49,20 @@ export default function page() {
   const [nodeID,setNodeID] = useState({});
   const [totalChildNodeCount,setTotalChildNodeCount] = useState<number>()
   const [menu, setMenu] = useState<Menu>(null);
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement>(null); 
   const [shareInput,setShareInput] = useState("");
 
   const [checkPostitionUpdated,setCheckPostitionUpdated] = useState(false)
   const [checkCreatedNewNode,setCheckCreatedNewNode] = useState<boolean>(false);
   const [checkBgColorChange,setCheckBgColorChange] = useState(false);
   const [checktextUpdated,setCheckTextUpdated] = useState(false);
+  const [checkNodeDeleted,setCheckodeDeleted] = useState(false);
+  const [checkLinkUpdated,setCheckLinkUpdated] = useState(false);
+  const [stateButtonLoaded,setStateButtonLoaded] = useState(false)
 
   const [ parentNodePosition,setParentNodePosition] = useState<Position>({ x : 396.00 , y : 162.00 });
   const { projectid } = useParams()
+  const { toast } = useToast()
 
 
 
@@ -88,7 +91,7 @@ export default function page() {
       }
     }
       fetchallNodes()
-  },[checkCreatedNewNode,checkPostitionUpdated,checkBgColorChange,checktextUpdated])
+  },[checkCreatedNewNode,checkPostitionUpdated,checkBgColorChange,checktextUpdated,checkNodeDeleted,checkLinkUpdated])
 
 
   useEffect(() => {
@@ -121,7 +124,7 @@ export default function page() {
     setNodes(initialNodes)
     setEdges(initialEdges)
 
-  },[nodeData,checkCreatedNewNode,checkPostitionUpdated,checkBgColorChange,checktextUpdated])
+  },[nodeData,checkCreatedNewNode,checkPostitionUpdated,checkBgColorChange,checktextUpdated,checkNodeDeleted,checkLinkUpdated])
 
   // async function to create node
   async function createDefaultNode(){ 
@@ -163,12 +166,17 @@ export default function page() {
 
       const nodePositon : Position = calculateChildNodePosition(parentNodePosition,totalChildNodeCount)
 
+      if(!nodePositon){
+        console.error(nodePositon ?? "Node position Error")
+        return;
+      }
+
       const res = await fetch(`/api/addnodes/${projectid}`,{
         method : "POST",
         headers : {
           "Content-Type":"application/json"
         },
-        body : JSON.stringify({ title : "New Node", position : { "x" : nodePositon.x , "y" : nodePositon.y },parentNodeID : parent_id })  
+        body : JSON.stringify({ title : "New Node", position : { "x" : nodePositon.x , "y" : nodePositon.y }, parentNodeID : parent_id })  
       })
 
       if(res.status != 201){
@@ -180,6 +188,11 @@ export default function page() {
       console.log(data?.message)
 
       setCheckCreatedNewNode(!checkCreatedNewNode)
+      
+      toast({
+        title : data?.message,
+        className:"w-[300px]"
+      }) 
 
     } catch (error) {
       console.log(error ?? "Internal Server error")
@@ -200,7 +213,14 @@ export default function page() {
       }
       const data = await res.json();
     
-      console.log(data?.data?.message)
+      console.log(data?.message)
+
+      setCheckodeDeleted(!checkNodeDeleted)
+
+      toast({
+        title : data?.message,
+        className:"w-[300px]"
+      }) 
       
     } catch (error) {
       console.log(error ?? "Server Side Error")
@@ -238,18 +258,53 @@ export default function page() {
     }
   }
 
+  // delete All Nodes of a project
+  async function deleteAllNodes(projectIdTobepassed:any) {
+    try {
+
+      const res = await fetch(`/api/deleteAllNodes/${projectIdTobepassed}`,{
+        method : "DELETE"
+      })
+
+      if(res.status != 200){
+        console.log(res)
+      }
+
+      const data = await res.json()
+
+      console.log(data?.message)
+
+      toast({
+        title : data?.message,
+        className:"w-[300px]"
+      }) 
+
+      setCheckodeDeleted(!checkNodeDeleted)
+
+      toast({
+        title : data?.message,
+        variant : 'destructive'
+      })
+      
+      createDefaultNode()
+      
+    } catch (error) {
+      console.log(error ?? "Internal Server Error")
+    }
+  }
+
   // function to select a node and find the detail of the node this method comes from the reactflow libraby
   const onNodeClick = (event: React.MouseEvent, node: Node) => {
     setSelectedNode(node);
     toFindSingleNodeDetail(node.id)
-  }
+  } 
 
   // function which will listen to keyboard events
   const handleKeyPress = (e: KeyboardEvent) => {
     if(e.shiftKey && e.key == "N" && selectedNode){
       createNewNode(nodeID);
     }
-    if(e.key === "Backspace" || e.key === "Delete" && selectedNode){
+    if(e.key === "Delete" && selectedNode){
       deleteNode(nodeID);
     }
   }
@@ -276,11 +331,11 @@ const onNodeContextMenu = useCallback(
       console.log("ref connected")
       setMenu({
         id: node.id,
-        top: event.clientY < pane.height - 200 && event.clientY,
-        left: event.clientX < pane.width - 200 && event.clientX,
-        right: event.clientX >= pane.width - 200 && pane.width - event.clientX,
+        top: event.clientY < pane.height - 100 && event.clientY,
+        left: event.clientX < pane.width - 100 && event.clientX,
+        right: event.clientX >= pane.width - 100 && pane.width - event.clientX,
         bottom:
-          event.clientY >= pane.height - 200 && pane.height - event.clientY,
+          event.clientY >= pane.height - 100 && pane.height - event.clientY,
       });
     } else {
       console.log("errro in the ref field")
@@ -404,8 +459,6 @@ async function updatedNodePosition(nodeid : any, new_X :any , new_Y : any) {
 async function updateBgColorOfnode(nodeid : any, bgColorCode : string) {
   try {
 
-    // console.log("background Color code in the frontend part is ",bgColorCode);
-
     const res = await fetch(`/api/chBgcolor/${nodeid}`,{
       method : "PUT",
       headers : {
@@ -433,6 +486,8 @@ async function updateBgColorOfnode(nodeid : any, bgColorCode : string) {
 async function updatedText(nodeid :any, updatedText :string){
   try {
 
+    setStateButtonLoaded(true)
+
     const res = await fetch(`/api/changetextofNode/${nodeid}`,{
       method  : 'PUT',
       headers : {
@@ -447,8 +502,12 @@ async function updatedText(nodeid :any, updatedText :string){
 
     const data = await res.json()
 
-    console.log(data?.data?.message)
+    toast({
+      title : data?.message,
+      className:"w-[300px]"
+    })   
 
+    setStateButtonLoaded(false)
     setCheckTextUpdated(!checktextUpdated)
     
   } catch (error) {
@@ -456,26 +515,77 @@ async function updatedText(nodeid :any, updatedText :string){
   }
 }
 
-
+// async function to update Link 
 async function UpdateAddLink(nodeid : any,link:string) {
-  const res = await fetch(`/api/addLinktoNode/${nodeid}`,{
-    method  : 'PUT',
-    headers : {
-      "Content-Type" : "application/json"
-    },
-    body : JSON.stringify({ link })
-  })
+  try {
 
-  if(res.status != 200){
-    console.log(res)
+    setStateButtonLoaded(true)
+
+    const res = await fetch(`/api/addLinktoNode/${nodeid}`,{
+      method  : 'PUT',
+      headers : {
+        "Content-Type" : "application/json"
+      },
+      body : JSON.stringify({ link })
+    })
+
+    if(res.status != 200){
+      console.log(res)
+    }
+
+    const data = await res.json()
+
+    toast({
+      title : data?.message,
+      className:"w-[300px]"
+    }) 
+
+    setStateButtonLoaded(false)
+
+    setCheckLinkUpdated(!checkLinkUpdated)
+    
+  } catch (error) {
+    console.log(error ?? "failed to update link")
   }
-
-  const data = await res.json()
-
-  console.log(data?.data?.message)
 }
 
+// async function to open link
+const onNodeDoubleClick = (event: React.MouseEvent,node: Node) => {
+  handleFindNodeUrlLink(node?.id)
+}
 
+async function handleFindNodeUrlLink(nodeid:any) {
+  try {
+
+    const res = await fetch(`/api/findNodeLinkUrl/${nodeid}`)
+
+    if(res.status != 200){
+      console.log(res)
+
+      const data = await res.json()
+
+      toast({
+          title : data?.message,
+          className:"w-[300px]"
+      }) 
+    }
+
+    const data = await res.json()
+
+    toast({
+        title : data?.message,
+        className:"w-[300px]"
+    })  
+
+    console.log(data)
+
+    window.open(`https://www.${data?.data}`,'_blank')
+
+
+  } catch (error) {
+    console.log(error ?? "Internal Error")
+  }
+}
 
 
 // function to calculate position 
@@ -521,10 +631,6 @@ async function UpdateAddLink(nodeid : any,link:string) {
     (params : any) => setEdges((eds : any) => addEdge(params, eds)),
     [setEdges],
   );
-
-  // <div className=' flex gap-2 items-center border cursor-pointer border-white shadow-md shadow-slate-300 p-1 rounded' onClick={handleDownloadClick}>
-  //               <p className='text-xs px-2'>Download</p>
-  //             </div>
 
   return (
     <div style={{ width: '100vw', height: '100vh' }}>
@@ -593,10 +699,21 @@ async function UpdateAddLink(nodeid : any,link:string) {
               onPaneClick={onPaneClick}
               onNodeContextMenu={onNodeContextMenu}
               onNodeDragStop={handleNodeDragStop}
+              onNodeDoubleClick={onNodeDoubleClick}
               fitView
             >
      <Background />
-      {menu && <ContextMenu onClick={onPaneClick} {...menu} newNodeCreationFunction={createNewNode} deletionOfNodeFunction={deleteNode} updateBgColorOfnode={updateBgColorOfnode} updatedText={updatedText} UpdateAddLink={UpdateAddLink} />}
+      {menu && <ContextMenu onClick={onPaneClick} {...menu} 
+          newNodeCreationFunction={createNewNode} 
+          deletionOfNodeFunction={deleteNode} 
+          updateBgColorOfnode={updateBgColorOfnode} 
+          updatedText={updatedText} 
+          UpdateAddLink={UpdateAddLink} 
+          deleteAllNodes={deleteAllNodes}
+          handleFindNodeUrlLink={handleFindNodeUrlLink}
+          buttonStateChecker={stateButtonLoaded}
+      />
+      }
     </ReactFlow>
    </div>
   )
