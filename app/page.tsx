@@ -120,8 +120,6 @@ export default function Home() {
 
         const data = await res.json()
 
-        console.log(data?.message)
-
         setProjectDeletd(!projectDeleted)
 
         toast({
@@ -151,8 +149,6 @@ export default function Home() {
         }
 
         const data = await res.json()
-
-        console.log(data?.message)
 
         toast({
           title : data?.message,

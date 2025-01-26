@@ -39,7 +39,6 @@ import { Menu,Position } from '@/types/types';
 import { getURL } from 'next/dist/shared/lib/utils';
 import puppeteer from "puppeteer"
 import { useToast } from "@/hooks/use-toast"
-import { useRouter } from 'next/router';  
 
 export default function page() { 
   const [nodeData,setNodeData] = useState([]);
@@ -59,6 +58,7 @@ export default function page() {
   const [checkNodeDeleted,setCheckodeDeleted] = useState(false);
   const [checkLinkUpdated,setCheckLinkUpdated] = useState(false);
   const [stateButtonLoaded,setStateButtonLoaded] = useState(false)
+  const [hoveredNode, setHoveredNode] = useState<Node | null>(null); 
 
   const [ parentNodePosition,setParentNodePosition] = useState<Position>({ x : 396.00 , y : 162.00 });
   const { projectid } = useParams()
@@ -84,8 +84,6 @@ export default function page() {
 
         setNodeData(data?.data) // set the node data here
 
-        console.log(data)
-
       } catch (error) {
         console.log(error ?? "Error from Server side")
       }
@@ -109,8 +107,6 @@ export default function page() {
         backgroundColor: nodefield?.style?.backgroundColor
       }
     }])
-
-    console.log("initialNodes",initialNodes)
 
     const initialEdges = nodeData.flatMap((nodefield : any) => {
       if(!nodefield?.parentNodeID) return []; //if no parent of a node then it mean it is root node
@@ -143,8 +139,6 @@ export default function page() {
       }
 
       const data = await res.json()
-
-      console.log(data?.message)
 
       setCheckCreatedNewNode(!checkCreatedNewNode)
 
@@ -185,8 +179,6 @@ export default function page() {
 
       const data = await res.json()
 
-      console.log(data?.message)
-
       setCheckCreatedNewNode(!checkCreatedNewNode)
       
       toast({
@@ -213,8 +205,6 @@ export default function page() {
       }
       const data = await res.json();
     
-      console.log(data?.message)
-
       setCheckodeDeleted(!checkNodeDeleted)
 
       toast({
@@ -247,7 +237,6 @@ export default function page() {
 
       // calulating position of the parent node 
       const calculateParentNodePositon : Position = data?.data?.position
-      console.log(calculateParentNodePositon)
 
       setParentNodePosition(calculateParentNodePositon);
       
@@ -271,8 +260,6 @@ export default function page() {
       }
 
       const data = await res.json()
-
-      console.log(data?.message)
 
       toast({
         title : data?.message,
@@ -328,7 +315,6 @@ const onNodeContextMenu = useCallback(
     // doesn't get positioned off-screen.
     if(ref.current){
       const pane = ref.current.getBoundingClientRect();
-      console.log("ref connected")
       setMenu({
         id: node.id,
         top: event.clientY < pane.height - 100 && event.clientY,
@@ -358,8 +344,6 @@ async function downloadInPdfFormat(){
 
     const blob = await res.blob();
     const url = window.URL.createObjectURL(blob);
-
-    console.log("url",url)
 
     const link = document.createElement('a');
     link.href = url;
@@ -394,7 +378,6 @@ const convertToMarkdown = (nodeData : any) => {
     })
   }
   buildMarkdownTree(rootNode, 1);
-  console.log(markdown)
   return markdown;
 }
 
@@ -418,13 +401,11 @@ const handleDownloadFormat = (format : 'pdf' | 'markdown') => {
 // functions to share the files 
 async function constructShareUrl(){
   const constructedUrl = `${window.location.origin}${getURL()}`
-  console.log(constructedUrl)
   setShareInput(constructedUrl);
 }
 
 // function to handle node drag and adjust aw to position
 const handleNodeDragStop = (event: React.MouseEvent, node: Node) => {
-  console.log("node id which is moved",node?.id)
   updatedNodePosition(node?.id, node?.position?.x,node?.position?.y)
 }
 
@@ -472,8 +453,6 @@ async function updateBgColorOfnode(nodeid : any, bgColorCode : string) {
     }
 
     const data = await res.json()
-
-    console.log("Node Bg Updated",data?.data)
 
     setCheckBgColorChange(!checkBgColorChange)
 
@@ -576,8 +555,6 @@ async function handleFindNodeUrlLink(nodeid:any) {
         title : data?.message,
         className:"w-[300px]"
     })  
-
-    console.log(data)
 
     window.open(`https://www.${data?.data}`,'_blank')
 
@@ -715,6 +692,7 @@ async function handleFindNodeUrlLink(nodeid:any) {
       />
       }
     </ReactFlow>
+
    </div>
   )
 }
