@@ -173,7 +173,6 @@ export default function Home() {
 
 
     function moveToworkflow(projectID : string){
-      //  router.replace(`/workspace/${projectID}`)
       router.push(`/workspace/${projectID}`)
     }
 

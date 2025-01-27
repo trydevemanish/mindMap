@@ -37,7 +37,6 @@ import { Node,Edge } from "@xyflow/react"
 import ContextMenu from '@/components/ContextMenu';
 import { Menu,Position } from '@/types/types';
 import { getURL } from 'next/dist/shared/lib/utils';
-import puppeteer from "puppeteer"
 import { useToast } from "@/hooks/use-toast"
 
 export default function page() { 
@@ -58,7 +57,6 @@ export default function page() {
   const [checkNodeDeleted,setCheckodeDeleted] = useState(false);
   const [checkLinkUpdated,setCheckLinkUpdated] = useState(false);
   const [stateButtonLoaded,setStateButtonLoaded] = useState(false)
-  const [hoveredNode, setHoveredNode] = useState<Node | null>(null); 
 
   const [ parentNodePosition,setParentNodePosition] = useState<Position>({ x : 396.00 , y : 162.00 });
   const { projectid } = useParams()
@@ -77,12 +75,11 @@ export default function page() {
         }
         const data = await res.json()
 
-        //checking if there is data (which is an array) in my data variable if not then i will creta a default one 
         if(data?.data?.length == 0){
           createDefaultNode()
         }
 
-        setNodeData(data?.data) // set the node data here
+        setNodeData(data?.data)
 
       } catch (error) {
         console.log(error ?? "Error from Server side")
@@ -109,7 +106,7 @@ export default function page() {
     }])
 
     const initialEdges = nodeData.flatMap((nodefield : any) => {
-      if(!nodefield?.parentNodeID) return []; //if no parent of a node then it mean it is root node
+      if(!nodefield?.parentNodeID) return []; 
       return [{
         id : `e${nodefield?.parentNodeID}-${nodefield?._id}`,
         source : `${nodefield?.parentNodeID}`,
@@ -148,15 +145,8 @@ export default function page() {
   }
 
 
-  // how i will creta a new node 
-  // first i will select the node then i will press shift+N -> then the selected node id will be passed as a parent id and new node will be created
-  // how the flow will look like 
-  // select a node -> after selecting a node find its detail -> press shift+N -> after it pressed i will pass his id as parentnodeid and call the function
-
   async function createNewNode(parent_id : string | any) {
     try {
-
-      // here i need to find the position of the node that is being created and set position of it 
 
       const nodePositon : Position = calculateChildNodePosition(parentNodePosition,totalChildNodeCount)
 
@@ -227,20 +217,14 @@ export default function page() {
 
       const data = await res.json()
 
-      setNodeID(data?.data?._id) // setting id to find the node detail and putting this id as a parent id for creating a new node.
-      // setChildNodeCount(data?.data?.childNodeID)
+      setNodeID(data?.data?._id) 
 
       const totaChilddata : any = data?.data?.childNodeID
-      // console.log(totaChilddata.length)
-      setTotalChildNodeCount(totaChilddata.length) //setting total child node count to calculate the position of the node.
+      setTotalChildNodeCount(totaChilddata.length) 
 
-
-      // calulating position of the parent node 
       const calculateParentNodePositon : Position = data?.data?.position
 
       setParentNodePosition(calculateParentNodePositon);
-      
-
       
     } catch (error) {
       console.log(error ?? "Internal Server error")
@@ -308,11 +292,8 @@ export default function page() {
 
 const onNodeContextMenu = useCallback(
   (event :  React.MouseEvent, node: Node) => {
-    // Prevent native context menu from showing
     event.preventDefault();
 
-    // Calculate position of the context menu. We want to make sure it
-    // doesn't get positioned off-screen.
     if(ref.current){
       const pane = ref.current.getBoundingClientRect();
       setMenu({
@@ -404,7 +385,6 @@ async function constructShareUrl(){
   setShareInput(constructedUrl);
 }
 
-// function to handle node drag and adjust aw to position
 const handleNodeDragStop = (event: React.MouseEvent, node: Node) => {
   updatedNodePosition(node?.id, node?.position?.x,node?.position?.y)
 }
@@ -426,8 +406,6 @@ async function updatedNodePosition(nodeid : any, new_X :any , new_Y : any) {
      if(res.status != 200){
       console.log("failed res data",res)
      }
-
-     const data = await res.json()
 
      setCheckPostitionUpdated(!checkPostitionUpdated)
     
@@ -451,8 +429,6 @@ async function updateBgColorOfnode(nodeid : any, bgColorCode : string) {
     if(res.status != 200){
       console.log(res)
     }
-
-    const data = await res.json()
 
     setCheckBgColorChange(!checkBgColorChange)
 
@@ -565,14 +541,12 @@ async function handleFindNodeUrlLink(nodeid:any) {
 }
 
 
-// function to calculate position 
-// it will return the positon of the newly node created
+// function to calculate position it will return the positon of the newly node created
 
  const Horizontal_Spacing : number = 100;
  const Vertical_Spacing : number = 70;
 
   const calculateChildNodePosition = (parentPosition : Position, totalChildren : number | any) => {
-    // if parent Node don't have any child then the posiont of its first child
 
     if(totalChildren === 1){
         return {
@@ -590,9 +564,6 @@ async function handleFindNodeUrlLink(nodeid:any) {
 
   }
 
-
-  //---------------------------------------------------------------------------------------------------------
-  // these three method are for the connectivity of the node , like moving ,connecting from one to another and moving edges
 
   const onNodesChange = useCallback(
     (changes : any) => setNodes((nds : any) => applyNodeChanges(changes, nds)),
@@ -612,6 +583,7 @@ async function handleFindNodeUrlLink(nodeid:any) {
   return (
     <div style={{ width: '100vw', height: '100vh' }}>
         <div className='absolute right-8 z-10'>
+          
           {/* this div part is for download part  */}
           <div className='pt-3 px-6 flex justify-end gap-8 z-50'>
               <Select onValueChange={handleDownloadFormat}>

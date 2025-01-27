@@ -1,5 +1,5 @@
 "use client"
-import React, { useCallback, useState } from 'react';
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -52,7 +52,6 @@ export default function ContextMenu({
 
     const [inputText,setInputText] = useState("Enter the text .........")
     const [addLink,setAddLink] = useState("Ex like- google.com")
-    const [stateButtonLoaded,setStateButtonLoaded] = useState(false)
     
 
     const handleNewNodeCreation = () => {

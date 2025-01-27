@@ -1,6 +1,6 @@
-import { projectModel } from "../../../../model/projectPage"
+import { connectDb } from "@/connections/connectDb"
+import { projectModel } from "@/model/projectPage"
 import { NextResponse } from "next/server"
-import { connectDb } from "../../../../connections/connectDb"
 
 export async function POST(req : Request) {
     try {

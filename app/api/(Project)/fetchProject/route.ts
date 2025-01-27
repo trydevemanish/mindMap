@@ -1,6 +1,6 @@
-import { projectModel } from "../../../../model/projectPage"
-import { NextResponse } from "next/server"
-import { connectDb } from "../../../../connections/connectDb"
+import { NextResponse } from "next/server";
+import { projectModel } from "@/model/projectPage";
+import { connectDb } from "@/connections/connectDb";
 
 export async function GET(req: Request) {
     try {
