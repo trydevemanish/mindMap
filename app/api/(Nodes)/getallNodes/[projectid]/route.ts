@@ -2,13 +2,14 @@ import { NextResponse } from "next/server";
 import { connectDb } from "@/connections/connectDb";
 import { nodeModel } from "@/model/nodes";
 
-export async function GET(req : Request,{ params}:{params : any}){
+export async function GET(req : Request){
     try {
 
         console.log("test 1")
         await connectDb()
 
-        const { projectid } = await params
+        const url = new URL(req.url);
+        const projectid = url.pathname.split('/').pop();
 
         if(!projectid){
             return NextResponse.json(

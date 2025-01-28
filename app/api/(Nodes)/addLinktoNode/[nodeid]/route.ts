@@ -2,12 +2,14 @@ import { nodeModel } from "@/model/nodes";
 import { connectDb } from "@/connections/connectDb";
 import { NextResponse } from "next/server";
 
-export async function PUT(req:Request,{ params } : { params : any }) {
+export async function PUT(req:Request) {
     try {
 
         await connectDb()
         const { link } = await req.json()
-        const { nodeid } = await params
+
+        const url = new URL(req.url);
+        const nodeid = url.pathname.split('/').pop();
 
         if(!nodeid) {
             return NextResponse.json(

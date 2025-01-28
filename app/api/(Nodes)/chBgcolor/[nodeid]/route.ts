@@ -2,14 +2,15 @@ import { nodeModel } from "@/model/nodes";
 import { NextResponse } from "next/server";
 import { connectDb } from "@/connections/connectDb";
 
-export async function PUT(req:Request, { params } : { params : any }) {
+export async function PUT(req:Request) {
     try {
 
         await connectDb()
 
         const { bgColorCode } = await req.json()
 
-        console.log("bgcolor code",bgColorCode)
+        const url = new URL(req.url);
+        const nodeid = url.pathname.split('/').pop();
 
         if(!bgColorCode){
             return NextResponse.json(
@@ -17,8 +18,6 @@ export async function PUT(req:Request, { params } : { params : any }) {
                 {status : 400}
             )
         }
-
-        const { nodeid } = await params
 
         if(!nodeid) {
             return NextResponse.json(

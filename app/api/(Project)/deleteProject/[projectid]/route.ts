@@ -2,11 +2,12 @@ import { NextResponse } from "next/server";
 import { projectModel } from "@/model/projectPage";
 import { connectDb } from "@/connections/connectDb";
 
-export async function DELETE(req:Request,{params}:{params : any}) {
+export async function DELETE(req:Request) {
     try {
 
         await connectDb()
-        const { projectid } = await params
+
+        const projectid = req.url.split("/")[5]
 
         const deletedProject = await projectModel.findByIdAndDelete(projectid)
 

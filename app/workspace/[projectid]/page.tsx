@@ -38,13 +38,14 @@ import ContextMenu from '@/components/ContextMenu';
 import { Menu,Position } from '@/types/types';
 import { getURL } from 'next/dist/shared/lib/utils';
 import { useToast } from "@/hooks/use-toast"
+import { NodeDataType } from '@/types/types';
 
-export default function page() { 
-  const [nodeData,setNodeData] = useState([]);
+export default function Page() { 
+  const [nodeData,setNodeData] = useState<NodeDataType[]>([]);
   const [nodes, setNodes] = useState<Node[]>([]);
   const [edges, setEdges] = useState<Edge[]>([]);
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
-  const [nodeID,setNodeID] = useState({});
+  const [nodeID,setNodeID] = useState("");
   const [totalChildNodeCount,setTotalChildNodeCount] = useState<number>()
   const [menu, setMenu] = useState<Menu>(null);
   const ref = useRef<HTMLDivElement>(null); 
@@ -62,65 +63,8 @@ export default function page() {
   const { projectid } = useParams()
   const { toast } = useToast()
 
-
-
-  // on window load fetch all node of a project
-  useEffect(() => {
-    async function fetchallNodes(){
-      try {
-
-        const res = await fetch(`/api/getallNodes/${projectid}`)
-        if(res.status != 200){
-          console.log(res)
-        }
-        const data = await res.json()
-
-        if(data?.data?.length == 0){
-          createDefaultNode()
-        }
-
-        setNodeData(data?.data)
-
-      } catch (error) {
-        console.log(error ?? "Error from Server side")
-      }
-    }
-      fetchallNodes()
-  },[checkCreatedNewNode,checkPostitionUpdated,checkBgColorChange,checktextUpdated,checkNodeDeleted,checkLinkUpdated])
-
-
-  useEffect(() => {
-    
-    const initialNodes = nodeData.flatMap((nodefield : any) => [{
-      id : `${nodefield?._id.toString()}`,
-      position : {
-        x : nodefield?.position?.x,
-        y :  nodefield?.position?.y,
-      },  
-      data : {
-        label : `${nodefield?.title}`
-      },
-      style: {
-        backgroundColor: nodefield?.style?.backgroundColor
-      }
-    }])
-
-    const initialEdges = nodeData.flatMap((nodefield : any) => {
-      if(!nodefield?.parentNodeID) return []; 
-      return [{
-        id : `e${nodefield?.parentNodeID}-${nodefield?._id}`,
-        source : `${nodefield?.parentNodeID}`,
-        target : `${nodefield?._id.toString()}`
-      }]
-    }) 
-
-    setNodes(initialNodes)
-    setEdges(initialEdges)
-
-  },[nodeData,checkCreatedNewNode,checkPostitionUpdated,checkBgColorChange,checktextUpdated,checkNodeDeleted,checkLinkUpdated])
-
   // async function to create node
-  async function createDefaultNode(){ 
+  const createDefaultNode = useCallback(async() => {
     try {
 
       const res = await fetch(`/api/addnodes/${projectid}`,{
@@ -135,22 +79,100 @@ export default function page() {
         console.log("Error While creatinig Node in DB")
       }
 
-      const data = await res.json()
-
       setCheckCreatedNewNode(!checkCreatedNewNode)
 
     } catch (error) {
       console.log(error ?? "Internal Server error")
     }
-  }
+  },[checkCreatedNewNode,parentNodePosition.x,parentNodePosition.y,projectid]);
+
+  // on window load fetch all node of a project
+  useEffect(() => {
+    async function fetchallNodes(){
+      try {
+
+        const res = await fetch(`/api/getallNodes/${projectid}`)
+
+        if(res.status != 200){
+          console.log(res)
+        }
+
+        const data = await res.json()
+
+        if(data?.data?.length == 0){
+          createDefaultNode()
+        }
+        
+        setNodeData(data?.data)
+
+      } catch (error) {
+        console.log(error ?? "Error from Server side")
+      }
+    }
+      fetchallNodes()
+  },[checkCreatedNewNode,checkPostitionUpdated,checkBgColorChange,checktextUpdated,checkNodeDeleted,checkLinkUpdated,createDefaultNode,projectid ])
 
 
-  async function createNewNode(parent_id : string | any) {
+  useEffect(() => {
+    
+    const initialNodes = nodeData.flatMap((nodefield : NodeDataType) => [{
+      id : `${nodefield?._id.toString()}`,
+      position : {
+        x : nodefield?.position?.x,
+        y :  nodefield?.position?.y,
+      },  
+      data : {
+        label : `${nodefield?.title}`
+      },
+      style: {
+        backgroundColor: nodefield?.style?.backgroundColor
+      }
+    }])
+
+    const initialEdges = nodeData.flatMap((nodefield : NodeDataType) => {
+      if(!nodefield?.parentNodeID) return []; 
+      return [{
+        id : `e${nodefield?.parentNodeID}-${nodefield?._id}`,
+        source : `${nodefield?.parentNodeID}`,
+        target : `${nodefield?._id.toString()}`
+      }]
+    }) 
+
+    setNodes(initialNodes)
+    setEdges(initialEdges)
+
+  },[nodeData,checkCreatedNewNode,checkPostitionUpdated,checkBgColorChange,checktextUpdated,checkNodeDeleted,checkLinkUpdated])
+
+
+  // function to calculate position it will return the positon of the newly node created
+
+ const Horizontal_Spacing : number = 100;
+ const Vertical_Spacing : number = 70;
+
+  const calculateChildNodePosition = useCallback((parentPosition : Position, totalChildren : number) => {
+    if(totalChildren === 0){
+        return {
+            x : parentPosition.x,
+            y : parentPosition.y + Vertical_Spacing
+        }
+    }
+
+    const startX = parentPosition.x - ((totalChildren - 1) * Horizontal_Spacing) / 2;
+
+    return {
+      x: startX + ((totalChildNodeCount+1) * Horizontal_Spacing),
+      y: parentPosition.y + Vertical_Spacing
+    };
+
+  },[totalChildNodeCount])
+
+
+  const createNewNode = useCallback(async(parent_id : string) => {
     try {
 
       const nodePositon : Position = calculateChildNodePosition(parentNodePosition,totalChildNodeCount)
 
-      if(!nodePositon){
+      if(!nodePositon.x || !nodePositon.y){
         console.error(nodePositon ?? "Node position Error")
         return;
       }
@@ -165,6 +187,13 @@ export default function page() {
 
       if(res.status != 201){
         console.log("Error While creatinig Node in DB")
+
+        const data = await res.json()
+
+        toast({
+          title : data?.message,
+          className:"w-[300px]"
+        }) 
       }
 
       const data = await res.json()
@@ -179,11 +208,11 @@ export default function page() {
     } catch (error) {
       console.log(error ?? "Internal Server error")
     }
-  }
+  },[checkCreatedNewNode,parentNodePosition,projectid,toast,totalChildNodeCount,calculateChildNodePosition])
 
+  // program to delete the node when clicked once and delte button is pressed 
 
-  // program to delete the node when clicked once and delte button is pressed
-  async function deleteNode(nodeid : any){
+  const deleteNode = useCallback(async(nodeid : string) => {
     try {
 
       const res = await fetch(`/api/deleteNode/${nodeid}`,{
@@ -193,6 +222,7 @@ export default function page() {
       if(res.status != 200){
         console.log(res)
       }
+
       const data = await res.json();
     
       setCheckodeDeleted(!checkNodeDeleted)
@@ -205,10 +235,22 @@ export default function page() {
     } catch (error) {
       console.log(error ?? "Server Side Error")
     }
-  }  
+  },[checkNodeDeleted,toast])
 
-  async function toFindSingleNodeDetail(id :any){
+  async function toFindSingleNodeDetail(id :string){
     try {
+
+      if(!id){
+        toast({
+          title : "id not passed",
+          className:"w-[300px]"
+        }) 
+      } else {
+        toast({
+          title : "fetched single Node detail",
+          className:"w-[300px]"
+        }) 
+      }
 
       const res = await fetch(`/api/fetchSingleNode/${id}`)
       if(res.status != 200){
@@ -217,10 +259,11 @@ export default function page() {
 
       const data = await res.json()
 
-      setNodeID(data?.data?._id) 
+      setNodeID(data?.data?._id) // setting node id detail
 
-      const totaChilddata : any = data?.data?.childNodeID
-      setTotalChildNodeCount(totaChilddata.length) 
+      const totaChilddataLength : number = data?.data?.childNodeID.length
+
+      setTotalChildNodeCount(totaChilddataLength) 
 
       const calculateParentNodePositon : Position = data?.data?.position
 
@@ -232,7 +275,7 @@ export default function page() {
   }
 
   // delete All Nodes of a project
-  async function deleteAllNodes(projectIdTobepassed:any) {
+  async function deleteAllNodes(projectIdTobepassed:string) {
     try {
 
       const res = await fetch(`/api/deleteAllNodes/${projectIdTobepassed}`,{
@@ -243,12 +286,7 @@ export default function page() {
         console.log(res)
       }
 
-      const data = await res.json()
-
-      toast({
-        title : data?.message,
-        className:"w-[300px]"
-      }) 
+      const data = await res.json() 
 
       setCheckodeDeleted(!checkNodeDeleted)
 
@@ -270,24 +308,24 @@ export default function page() {
     toFindSingleNodeDetail(node.id)
   } 
 
-  // function which will listen to keyboard events
-  const handleKeyPress = (e: KeyboardEvent) => {
-    if(e.shiftKey && e.key == "N" && selectedNode){
-      createNewNode(nodeID);
-    }
-    if(e.key === "Delete" && selectedNode){
-      deleteNode(nodeID);
-    }
-  }
-
-
+  
   // writng a progrmam to listen on keyboard events
- useEffect(() => {
-  window.addEventListener('keydown', handleKeyPress);
-  return () => {
-     window.removeEventListener('keydown', handleKeyPress)
-  }
- },[selectedNode])
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if(e.shiftKey && e.key == "N" && selectedNode){
+        createNewNode(nodeID);
+      }
+      if(e.key === "Delete" && selectedNode){
+        deleteNode(nodeID);
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => {
+      window.removeEventListener('keydown', handleKeyPress)
+    }
+
+  },[selectedNode,deleteNode,createNewNode,nodeID])
 
 
 const onNodeContextMenu = useCallback(
@@ -339,25 +377,26 @@ async function downloadInPdfFormat(){
 }
 
 
-const convertToMarkdown = (nodeData : any) => {
+const convertToMarkdown = (nodeData : NodeDataType[]) => {
 
   if (!nodeData || nodeData.length === 0) return '';
-  const rootNode = nodeData.find((node : any) => node?.parentNodeID === null)
+  const rootNode = nodeData.find((node : NodeDataType) => node?.parentNodeID === null)
   if(!rootNode){
     console.error("No Root Node")
   }
 
   let markdown = `# ${rootNode.title}\n\n`
 
-  const buildMarkdownTree = (node: any, level: number) => {
+  const buildMarkdownTree = (node: NodeDataType, level: number) => {
     const childID  = node?.childNodeID || [];
-    const childrenNode = nodeData.filter((n : any) => childID.includes(n._id))
+    const childrenNode = nodeData.filter((n : NodeDataType) => childID.includes(n._id))
 
-    childrenNode.forEach((child : any) => {
+    childrenNode.forEach((child : NodeDataType) => {
       markdown += `${'  '.repeat(level)}- ${child?.title}\n`
       buildMarkdownTree(child, level + 1);
     })
   }
+
   buildMarkdownTree(rootNode, 1);
   return markdown;
 }
@@ -392,7 +431,7 @@ const handleNodeDragStop = (event: React.MouseEvent, node: Node) => {
 
 
 // function to update fields 
-async function updatedNodePosition(nodeid : any, new_X :any , new_Y : any) {
+async function updatedNodePosition(nodeid : string, new_X :number , new_Y : number) {
   try {
 
      const res = await fetch(`/api/changeNodePosition/${nodeid}`,{
@@ -415,7 +454,7 @@ async function updatedNodePosition(nodeid : any, new_X :any , new_Y : any) {
 }
 
 // updating Background Color of Node
-async function updateBgColorOfnode(nodeid : any, bgColorCode : string) {
+async function updateBgColorOfnode(nodeid : string, bgColorCode : string) {
   try {
 
     const res = await fetch(`/api/chBgcolor/${nodeid}`,{
@@ -438,7 +477,7 @@ async function updateBgColorOfnode(nodeid : any, bgColorCode : string) {
 }
 
 // async function to update text 
-async function updatedText(nodeid :any, updatedText :string){
+async function updatedText(nodeid :string, updatedText :string){
   try {
 
     setStateButtonLoaded(true)
@@ -471,7 +510,7 @@ async function updatedText(nodeid :any, updatedText :string){
 }
 
 // async function to update Link 
-async function UpdateAddLink(nodeid : any,link:string) {
+async function UpdateAddLink(nodeid : string,link:string) {
   try {
 
     setStateButtonLoaded(true)
@@ -509,7 +548,7 @@ const onNodeDoubleClick = (event: React.MouseEvent,node: Node) => {
   handleFindNodeUrlLink(node?.id)
 }
 
-async function handleFindNodeUrlLink(nodeid:any) {
+async function handleFindNodeUrlLink(nodeid:string) {
   try {
 
     const res = await fetch(`/api/findNodeLinkUrl/${nodeid}`)
@@ -541,42 +580,18 @@ async function handleFindNodeUrlLink(nodeid:any) {
 }
 
 
-// function to calculate position it will return the positon of the newly node created
-
- const Horizontal_Spacing : number = 100;
- const Vertical_Spacing : number = 70;
-
-  const calculateChildNodePosition = (parentPosition : Position, totalChildren : number | any) => {
-
-    if(totalChildren === 1){
-        return {
-            x : parentPosition.x,
-            y : parentPosition.y + Vertical_Spacing
-        }
-    } 
-
-      const startX = parentPosition.x - ((totalChildren - 1) * Horizontal_Spacing) / 2;
-
-      return {
-        x: startX + ((totalChildNodeCount+1) * Horizontal_Spacing),
-        y: parentPosition.y + Vertical_Spacing
-      };
-
-  }
-
-
   const onNodesChange = useCallback(
-    (changes : any) => setNodes((nds : any) => applyNodeChanges(changes, nds)),
+    (changes) => setNodes((nds) => applyNodeChanges(changes, nds)),
     [],
   );
 
   const onEdgesChange = useCallback(
-    (changes : any) => setEdges((eds : any) => applyEdgeChanges(changes, eds)),
+    (changes) => setEdges((eds) => applyEdgeChanges(changes, eds)),
     [],
   );
 
   const onConnect = useCallback(
-    (params : any) => setEdges((eds : any) => addEdge(params, eds)),
+    (params) => setEdges((eds) => addEdge(params, eds)),
     [setEdges],
   );
 

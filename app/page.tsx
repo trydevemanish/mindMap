@@ -110,6 +110,11 @@ export default function Home() {
     async function deleteProject(projectid : string) {
        try {
 
+        toast({
+          title : `project deleting ...`,
+          className:"w-[300px] text-sm font-light"
+        })
+
         const res = await fetch(`/api/deleteProject/${projectid}`,{
           method : "DELETE"
         })
@@ -136,6 +141,13 @@ export default function Home() {
     async function updateProjectName(projectid:string,newProjectName : string) {
       try {
 
+        setUpdatingProjectName(true)
+
+        toast({
+          title : `updating Project Name...`,
+          className:"w-[300px] text-sm font-light"
+        })
+
         const res = await fetch(`/api/changeProjectName/${projectid}`,{
           method : "PUT",
           headers : {
@@ -155,7 +167,7 @@ export default function Home() {
           className:"w-[300px] text-sm font-light"
         })
 
-        setUpdatingProjectName(!updatingProjectName)
+        setUpdatingProjectName(false)
         
       } catch (error) {
         console.log(error ?? "Internal Server Error")
@@ -173,6 +185,10 @@ export default function Home() {
 
 
     function moveToworkflow(projectID : string){
+      toast({
+        title : "Moving to workspace...",
+        className:"w-[300px] text-sm font-light"
+      })
       router.push(`/workspace/${projectID}`)
     }
 
@@ -242,7 +258,7 @@ export default function Home() {
                     </div>
                     <DialogFooter>
                       <Button type="submit" onClick={createProject} className="pl-10 pr-10 "> 
-                                {stateButtonLoaded === true ? <Loader2 size={12} className="animate-spin"/> : "Create"}
+                                {stateButtonLoaded === false ? <Loader2 size={12} className="animate-spin"/> : "Create"}
                       </Button>
                     </DialogFooter>
                   </DialogContent>
@@ -286,6 +302,7 @@ export default function Home() {
               {/* showing project data result  */}
               {projectdata.length != 0 ? (
                 <div>
+                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                   {projectdata.map((projectdatafeild : any,idx : number) => (
                     <ContextMenu key={idx}>
                       <ContextMenuTrigger>
@@ -324,7 +341,9 @@ export default function Home() {
                                 </div>
                               </div>
                               <DialogFooter>
-                                <Button type="submit" onClick={() => updateProjectName(projectdatafeild?._id,projectName)}>Update</Button>
+                                <Button type="submit" onClick={() => updateProjectName(projectdatafeild?._id,projectName)} className="pl-10 pr-10 ">
+                                  {updatingProjectName === true ? <Loader2 size={12} className="animate-spin"/> : "Update"}
+                                </Button>
                               </DialogFooter>
                             </DialogContent>
                           </Dialog>

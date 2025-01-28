@@ -2,12 +2,13 @@ import { connectDb } from "@/connections/connectDb";
 import { NextResponse } from "next/server";
 import { nodeModel } from "@/model/nodes";
 
-export async function GET(req:Request,{params} : {params : any}) {
+export async function GET(req:Request) {
     try {
 
         await connectDb()
 
-        const { nodeid } = await params
+        const url = new URL(req.url);
+        const nodeid = url.pathname.split('/').pop();
 
         const findLink = await nodeModel.findById(nodeid)
 

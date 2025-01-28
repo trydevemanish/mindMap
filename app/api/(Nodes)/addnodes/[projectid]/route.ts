@@ -2,11 +2,13 @@ import { connectDb } from "@/connections/connectDb"
 import { nodeModel } from "@/model/nodes"
 import { NextResponse } from "next/server"
 
-export async function POST(req : Request,{params} : {params : any}) {
+export async function POST(req : Request) {
     try {
         await connectDb()
         const { title,parentNodeID,position } = await req.json()
-        const { projectid } = await params
+        
+        const url = new URL(req.url);
+        const projectid = url.pathname.split('/').pop();
 
         if(!projectid){
             return NextResponse.json(   

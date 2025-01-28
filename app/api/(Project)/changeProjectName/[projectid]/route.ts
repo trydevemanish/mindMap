@@ -2,11 +2,13 @@ import { NextResponse } from "next/server";
 import { projectModel } from "@/model/projectPage";
 import { connectDb } from "@/connections/connectDb";
 
-export async function PUT(req:Request,{params}:{params : any}) {
+export async function PUT(req:Request) {
     try {
 
         await connectDb()
-        const { projectid } = await params
+
+        const url = new URL(req.url);
+        const projectid = url.pathname.split('/').pop();
 
         const {newProjectName} = await req.json()
 

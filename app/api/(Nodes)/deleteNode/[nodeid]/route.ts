@@ -2,12 +2,13 @@ import { connectDb } from "@/connections/connectDb";
 import { nodeModel } from "@/model/nodes";
 import { NextResponse } from "next/server";
 
-export async function DELETE(req:Request, {params} : {params : any}) {
+export async function DELETE(req:Request) {
     try {
 
         await connectDb()
         
-        const { nodeid } = await params
+        const url = new URL(req.url);
+        const nodeid = url.pathname.split('/').pop();
 
         if(!nodeid){
             return NextResponse.json(
@@ -19,7 +20,7 @@ export async function DELETE(req:Request, {params} : {params : any}) {
         const deletedNode = await nodeModel.findByIdAndDelete(nodeid)
 
         return NextResponse.json(
-            {message : "Node Deleted Success"},
+            {message : "Node Deleted Success",data : deletedNode},
             {status : 200}
         )
 

@@ -11,7 +11,7 @@ export async function GET(req: Request){
 
         const page = await browser.newPage();
 
-        await page.goto("http://localhost:3000/workspace/67708dc7626b52793abd8551", {
+        await page.goto(`${req.url}`, {
             waitUntil: "networkidle0", 
           });
       

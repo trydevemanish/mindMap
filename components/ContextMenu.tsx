@@ -14,6 +14,7 @@ import { BgColorList } from "@/components/Bgcolor"
 import { Input } from '@/components/ui/input';
 import { getURL } from 'next/dist/shared/lib/utils';
 import { Loader2 } from 'lucide-react';
+import { BgColorInterface } from '@/types/types';
 
  
 export default function ContextMenu({
@@ -33,21 +34,20 @@ export default function ContextMenu({
   handleFindNodeUrlLink,
   ...props
 } : { 
-    id : any ,
-    top : any,
-    left : any,
-    right : any, 
-    bottom : any, 
+    id : string ,
+    top : number,
+    left : number,
+    right : number, 
+    bottom : number, 
     onClick?: () => void, 
     buttonStateChecker : boolean,
-    newNodeCreationFunction? : (id : any) => any, 
-    deletionOfNodeFunction? : (id :any) => void, 
-    updateBgColorOfnode? : (id : any, 
-    bgColorCode? : string) => void, 
-    updatedText?: (id : any, inputText:string) => void,
-    UpdateAddLink?: (id : any, link : any) => void, 
-    deleteAllNodes?: (id : any) => void, 
-    handleFindNodeUrlLink?: (id : any) => void,
+    newNodeCreationFunction? : (id : string) => void, 
+    deletionOfNodeFunction? : (id :string) => void, 
+    updateBgColorOfnode? : (id : string, bgColorCode? : string) => void, 
+    updatedText?: (id : string, inputText:string) => void,
+    UpdateAddLink?: (id : string, link : string) => void, 
+    deleteAllNodes?: (id : string) => void, 
+    handleFindNodeUrlLink?: (id : string) => void,
   }) {
 
     const [inputText,setInputText] = useState("Enter the text .........")
@@ -89,6 +89,7 @@ export default function ContextMenu({
       style={{ top, left, right, bottom }}
       className="context-menu px-2 rounded py-3 w-40 flex-col justify-center items-center"
       {...props}
+      onClick={onClick}
     >
       <div onClick={handleNewNodeCreation} className='cursor-pointer pl-3 pr-3 pt-1 pb-2 hover:bg-zinc-50 hover:rounded'>New Node</div>
       <div onClick={handleDeletionOfNode} className='cursor-pointer pl-3 pr-3 pb-2 hover:bg-zinc-50 hover:rounded'>Delete</div>
@@ -166,7 +167,7 @@ export default function ContextMenu({
                 Choose Background Color of Node.
               </DialogDescription>
             </DialogHeader>
-              {Array.isArray(BgColorList) && BgColorList.map((bgcolorfields : any, idx :any) => (
+              {Array.isArray(BgColorList) && BgColorList.map((bgcolorfields : BgColorInterface) => (
                 <p 
                     key={bgcolorfields?.bgColor_id} 
                     className='cursor-pointer text-sm border-b px-2 opacity-70'

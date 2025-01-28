@@ -5,14 +5,9 @@ import { NextResponse } from "next/server"
 export async function POST(req : Request) {
     try {
 
-        console.log("test 1")
         await connectDb()
-        console.log("test 2")
 
         const { projectName, description } = await req.json()
-
-        console.log(projectName)
-        console.log(description)
 
         if(!projectName && !description){
             return NextResponse.json(
@@ -21,7 +16,7 @@ export async function POST(req : Request) {
             )
         }
 
-        let today = new Date();
+        const today = new Date();
         const construct_Date = today.toLocaleDateString("en-US")
   
         const res = await projectModel.create({
