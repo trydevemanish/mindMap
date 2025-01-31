@@ -35,3 +35,10 @@ export type BgColorInterface = {
     bgColorName : string;
     bgColorCode : string;
 }
+
+export type ProjectType = {
+    created_At : string;
+    description : string;
+    projectName : string;
+    _id : string;
+}

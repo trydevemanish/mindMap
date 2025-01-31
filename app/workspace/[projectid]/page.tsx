@@ -31,6 +31,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+
+
  
 import '@xyflow/react/dist/style.css';
 import { Node,Edge } from "@xyflow/react"
@@ -110,9 +112,9 @@ export default function Page() {
       }
     }
       fetchallNodes()
-  },[checkCreatedNewNode,checkPostitionUpdated,checkBgColorChange,checktextUpdated,checkNodeDeleted,checkLinkUpdated,createDefaultNode,projectid ])
+  },[checkCreatedNewNode,checkPostitionUpdated,checkBgColorChange,checktextUpdated,checkNodeDeleted,checkLinkUpdated,projectid])
 
-
+  // setting value of inital node and edges
   useEffect(() => {
     
     const initialNodes = nodeData.flatMap((nodefield : NodeDataType) => [{
@@ -174,6 +176,10 @@ export default function Page() {
 
       if(!nodePositon.x || !nodePositon.y){
         console.error(nodePositon ?? "Node position Error")
+        toast({
+          title : 'Node not selected',
+          className : 'w-[300px] text-sm '
+        })
         return;
       }
 
@@ -185,18 +191,16 @@ export default function Page() {
         body : JSON.stringify({ title : "New Node", position : { "x" : nodePositon.x , "y" : nodePositon.y }, parentNodeID : parent_id })  
       })
 
+      const data = await res.json()
+
       if(res.status != 201){
         console.log("Error While creatinig Node in DB")
-
-        const data = await res.json()
 
         toast({
           title : data?.message,
           className:"w-[300px]"
         }) 
       }
-
-      const data = await res.json()
 
       setCheckCreatedNewNode(!checkCreatedNewNode)
       
@@ -375,7 +379,7 @@ async function downloadInPdfFormat(){
     console.error('PDF generation failed:', error);
   }
 }
-
+  
 
 const convertToMarkdown = (nodeData : NodeDataType[]) => {
 
@@ -490,11 +494,15 @@ async function updatedText(nodeid :string, updatedText :string){
       body : JSON.stringify({ updatedText })
     })
 
+    const data = await res.json()
+
     if(res.status != 200){
-      console.log(res)
+      toast({
+        title : data?.message,
+        className:"w-[300px]"
+      })
     }
 
-    const data = await res.json()
 
     toast({
       title : data?.message,
@@ -523,11 +531,16 @@ async function UpdateAddLink(nodeid : string,link:string) {
       body : JSON.stringify({ link })
     })
 
+    const data = await res.json()
+
     if(res.status != 200){
       console.log(res)
+      toast({
+        title : data?.message,
+        className:"w-[300px]"
+      }) 
     }
 
-    const data = await res.json()
 
     toast({
       title : data?.message,
@@ -543,28 +556,19 @@ async function UpdateAddLink(nodeid : string,link:string) {
   }
 }
 
-// async function to open link
-const onNodeDoubleClick = (event: React.MouseEvent,node: Node) => {
-  handleFindNodeUrlLink(node?.id)
-}
 
 async function handleFindNodeUrlLink(nodeid:string) {
   try {
 
     const res = await fetch(`/api/findNodeLinkUrl/${nodeid}`)
 
+    const data = await res.json()
     if(res.status != 200){
-      console.log(res)
-
-      const data = await res.json()
-
       toast({
           title : data?.message,
           className:"w-[300px]"
       }) 
     }
-
-    const data = await res.json()
 
     toast({
         title : data?.message,
@@ -572,7 +576,6 @@ async function handleFindNodeUrlLink(nodeid:string) {
     })  
 
     window.open(`https://www.${data?.data}`,'_blank')
-
 
   } catch (error) {
     console.log(error ?? "Internal Error")
@@ -652,6 +655,7 @@ async function handleFindNodeUrlLink(nodeid:string) {
               </div>
           </div>
         </div>
+
        <ReactFlow
               ref={ref}
               nodes={nodes}
@@ -663,7 +667,6 @@ async function handleFindNodeUrlLink(nodeid:string) {
               onPaneClick={onPaneClick}
               onNodeContextMenu={onNodeContextMenu}
               onNodeDragStop={handleNodeDragStop}
-              onNodeDoubleClick={onNodeDoubleClick}
               fitView
             >
      <Background />

@@ -11,6 +11,13 @@ export async function PUT(req:Request) {
 
         const { updatedText } = await req.json()
 
+        if(!updatedText){
+            return NextResponse.json(
+                {message : "pls provide new text"},
+                {status : 400}
+            )
+        }
+
         const updatedTextOfNode = await nodeModel.findByIdAndUpdate(
             nodeid,
             { title : updatedText }

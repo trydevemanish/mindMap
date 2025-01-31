@@ -18,6 +18,13 @@ export async function PUT(req:Request) {
             )
         }
 
+        if(!link) {
+            return NextResponse.json(
+                {message : "pls enter the link"},
+                {status : 404}
+            )
+        }
+
         const linkAdded = await nodeModel.findByIdAndUpdate(
             nodeid,
             {link : link}

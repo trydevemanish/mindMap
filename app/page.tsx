@@ -1,9 +1,10 @@
 "use client"
 import { Star } from "lucide-react"
 import React from "react"
-import { useEffect, useState } from "react"
+import { useEffect, useState,useCallback } from "react"
 import { Button } from "../components/ui/button"
 import { Loader2 } from "lucide-react"
+import { ProjectType } from "@/types/types"
 import {
   Dialog,
   DialogContent,
@@ -36,7 +37,7 @@ import {
 } from "@/components/ui/select"
 
 export default function Home() {
-  const [projectdata, setProjectData] = useState([])
+  const [projectdata, setProjectData] = useState<ProjectType[] | null>([])
   const [projectName,setProjectName] = useState("")
   const [description,setdescription] = useState("")
 
@@ -49,31 +50,9 @@ export default function Home() {
     const { toast } = useToast()
     const router = useRouter()
 
-    // fetch all the project details
-    useEffect(() => {
-        async function fetchProjectDetail(){
-          try {
     
-            const res = await fetch("/api/fetchProject")
-    
-            if(res.status != 200){
-              console.log(res)
-            }
-    
-            const data = await res.json()
-
-            setProjectData(data?.data)
-            
-          } catch (error) {
-            console.log(error ?? "Server Internal issue")
-          }
-        }
-        fetchProjectDetail()
-    },[newProjectCreated,projectDeleted,updatingProjectName])
-
-
     // create a new Project 
-    async function createProject(){
+    const createProject = useCallback(async() => {
       try {
 
         setStateButtonLoaded(true)
@@ -83,7 +62,7 @@ export default function Home() {
           headers : {
             "Content-Type" : "application/json"
           },
-          body : JSON.stringify({ projectName, description })
+          body : JSON.stringify({ projectName : projectName, description : description })
         })
     
         if(res.status != 201){
@@ -104,11 +83,12 @@ export default function Home() {
       } catch (error) {
         console.log(error ?? "Internal Server Issue")
       }
-    }
+    },[stateButtonLoaded,newProjectCreated,toast])
 
-    // delete a Project
-    async function deleteProject(projectid : string) {
-       try {
+
+    // // delete a Project
+    const deleteProject = useCallback(async(projectid : string) => {
+      try {
 
         toast({
           title : `project deleting ...`,
@@ -135,10 +115,11 @@ export default function Home() {
        } catch (error) {
           console.log(error ?? "Inter Server Issue")
        }
-    }
+    },[projectDeleted,toast])
+
 
     // update Project Name 
-    async function updateProjectName(projectid:string,newProjectName : string) {
+    const updateProjectName = useCallback(async(projectid:string,newProjectName : string) => {
       try {
 
         setUpdatingProjectName(true)
@@ -153,7 +134,7 @@ export default function Home() {
           headers : {
             "Content-Type" : "application/json"
           },
-          body : JSON.stringify({ newProjectName })
+          body : JSON.stringify({ newProjectName : newProjectName })
         })
 
         if(res.status != 200){
@@ -172,7 +153,29 @@ export default function Home() {
       } catch (error) {
         console.log(error ?? "Internal Server Error")
       }
-    }
+    },[updatingProjectName,toast])
+
+    // fetch all the project details
+    useEffect(() => {
+        async function fetchProjectDetail(){
+          try {
+    
+            const res = await fetch("/api/fetchProject")
+    
+            if(res.status != 200){
+              console.log(res)
+            }
+    
+            const data = await res.json()
+
+            setProjectData(data?.data)
+            
+          } catch (error) {
+            console.log(error ?? "Server Internal issue")
+          }
+        }
+        fetchProjectDetail()
+    },[newProjectCreated,projectDeleted,updatingProjectName])
 
 
     function makeShort(text : string,minlen : number){
@@ -182,7 +185,6 @@ export default function Home() {
   
       return text.slice(0,minlen)+"..."
     }
-
 
     function moveToworkflow(projectID : string){
       toast({
@@ -258,7 +260,7 @@ export default function Home() {
                     </div>
                     <DialogFooter>
                       <Button type="submit" onClick={createProject} className="pl-10 pr-10 "> 
-                                {stateButtonLoaded === false ? <Loader2 size={12} className="animate-spin"/> : "Create"}
+                                {stateButtonLoaded === true ? <Loader2 size={12} className="animate-spin"/> : "Create"}
                       </Button>
                     </DialogFooter>
                   </DialogContent>
@@ -302,8 +304,7 @@ export default function Home() {
               {/* showing project data result  */}
               {projectdata.length != 0 ? (
                 <div>
-                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                  {projectdata.map((projectdatafeild : any,idx : number) => (
+                  {projectdata.map((projectdatafeild : ProjectType,idx : number) => (
                     <ContextMenu key={idx}>
                       <ContextMenuTrigger>
                         <div className="flex justify-around pt-5 border-b cursor-pointer opacity-85 text-[0.8rem]"  onClick={() => moveToworkflow(projectdatafeild?._id)}>
@@ -320,7 +321,7 @@ export default function Home() {
                             <DialogTrigger asChild>
                             <button className="opacity-85 self-center" onClick={(e) => e.stopPropagation()}>Change Project Name</button>
                             </DialogTrigger>
-                            <DialogContent className="sm:max-w-[425px]">
+                            <DialogContent className="sm:max-w-[425px]" onKeyDown={(e) => e.stopPropagation()}>
                               <DialogHeader>
                                 <DialogTitle className="text-base">Update Project Name..</DialogTitle>
                                 <DialogDescription className="opacity-70 text-sm">

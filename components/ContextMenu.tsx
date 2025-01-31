@@ -1,6 +1,7 @@
 "use client"
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button"
+
 import {
   Dialog,
   DialogContent,
@@ -10,6 +11,19 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+
+// import {
+//   AlertDialog,
+//   AlertDialogAction,
+//   AlertDialogCancel,
+//   AlertDialogContent,
+//   AlertDialogDescription,
+//   AlertDialogFooter,
+//   AlertDialogHeader,
+//   AlertDialogTitle,
+//   AlertDialogTrigger,
+// } from "@/components/ui/alert-dialog"
+
 import { BgColorList } from "@/components/Bgcolor"
 import { Input } from '@/components/ui/input';
 import { getURL } from 'next/dist/shared/lib/utils';
@@ -52,7 +66,6 @@ export default function ContextMenu({
 
     const [inputText,setInputText] = useState("Enter the text .........")
     const [addLink,setAddLink] = useState("Ex like- google.com")
-    
 
     const handleNewNodeCreation = () => {
         newNodeCreationFunction(id);
@@ -89,20 +102,19 @@ export default function ContextMenu({
       style={{ top, left, right, bottom }}
       className="context-menu px-2 rounded py-3 w-40 flex-col justify-center items-center"
       {...props}
-      onClick={onClick}
     >
       <div onClick={handleNewNodeCreation} className='cursor-pointer pl-3 pr-3 pt-1 pb-2 hover:bg-zinc-50 hover:rounded'>New Node</div>
       <div onClick={handleDeletionOfNode} className='cursor-pointer pl-3 pr-3 pb-2 hover:bg-zinc-50 hover:rounded'>Delete</div>
       <div onClick={handleDeleteAllNodes} className='cursor-pointer pl-3 pr-3 pb-2 hover:bg-zinc-50 hover:rounded'>Delete All Nodes</div>
       <div onClick={handleOpenLink} className='cursor-pointer pl-3 pr-3 pb-2 hover:bg-zinc-50 hover:rounded'>Open Link</div>
       <div className='pl-3 pr-3 pb-2 hover:bg-zinc-50 hover:rounded'>
-      <Dialog >
+            <Dialog >
               <DialogTrigger asChild>
                  <p className="cursor-pointer">Add Link</p>
               </DialogTrigger>
               <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                  <DialogTitle />
+                <DialogTitle onClick={onClick}>Add Link</DialogTitle>
                   <DialogDescription>
                     Enter the Link....
                   </DialogDescription>
@@ -119,7 +131,7 @@ export default function ContextMenu({
                 </div>
                 <DialogFooter>
                   <Button type="submit" onClick={handleAddLInk} className="pl-16 pr-16"> 
-                              {buttonStateChecker === true ? <Loader2 size={12} className="animate-spin"/> : "Save changes"}
+                              {buttonStateChecker ? <Loader2 size={12} className="animate-spin"/> : "Save changes"}
                   </Button>
                 </DialogFooter>
               </DialogContent>
