@@ -87,7 +87,7 @@ export default function Home() {
       } finally {
         setStateButtonLoaded(false)
       }
-    },[stateButtonLoaded,newProjectCreated,toast,projectName,description])
+    },[newProjectCreated,toast,projectName,description])
 
 
     // // delete a Project
@@ -167,7 +167,7 @@ export default function Home() {
       } catch (error) {
         console.log(error ?? "Internal Server Error")
       } 
-    },[updatingProjectName,toast])
+    },[toast])
 
     // fetch all the project details
     useEffect(() => {
@@ -194,7 +194,7 @@ export default function Home() {
           }
         }
         fetchProjectDetail()
-    },[newProjectCreated,projectDeleted,updatingProjectName])
+    },[newProjectCreated,projectDeleted,updatingProjectName,toast])
 
 
     function makeShort(text : string,minlen : number){

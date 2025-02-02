@@ -1,5 +1,5 @@
 "use client"
-import React, { useState,useCallback } from 'react';
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button"
 
 import {
@@ -11,18 +11,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-
-// import {
-//   AlertDialog,
-//   AlertDialogAction,
-//   AlertDialogCancel,
-//   AlertDialogContent,
-//   AlertDialogDescription,
-//   AlertDialogFooter,
-//   AlertDialogHeader,
-//   AlertDialogTitle,
-//   AlertDialogTrigger,
-// } from "@/components/ui/alert-dialog"
 
 import { BgColorList } from "@/components/Bgcolor"
 import { Input } from '@/components/ui/input';
@@ -144,7 +132,7 @@ export default function ContextMenu({
               </DialogTrigger>
               <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                  <DialogTitle />
+                  <DialogTitle onClick={onClick}/>
                   <DialogDescription>
                     Enter the text....
                   </DialogDescription>

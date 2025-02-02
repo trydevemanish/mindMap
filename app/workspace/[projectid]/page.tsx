@@ -92,7 +92,7 @@ export default function Page() {
     } catch (error) {
       console.log(error ?? "Internal Server error")
     }
-  },[checkCreatedNewNode,parentNodePosition.x,parentNodePosition.y,projectid]);
+  },[checkCreatedNewNode,parentNodePosition.x,parentNodePosition.y,projectid,toast]);
 
   // on window load fetch all node of a project
   useEffect(() => {
@@ -124,7 +124,7 @@ export default function Page() {
       }
     }
       fetchallNodes()
-  },[checkCreatedNewNode,checkPostitionUpdated,checkBgColorChange,checktextUpdated,checkNodeDeleted,checkLinkUpdated,projectid])
+  },[checkCreatedNewNode,checkPostitionUpdated,checkBgColorChange,checktextUpdated,checkNodeDeleted,checkLinkUpdated,projectid,createDefaultNode,toast])
 
   // setting value of inital node and edges
   useEffect(() => {
@@ -302,7 +302,7 @@ export default function Page() {
     } catch (error) {
       console.log(error ?? "Internal Server error")
     }
-  },[nodeID,selectedNode,totalChildNodeCount,parentNodePosition.x,parentNodePosition.y,toast])
+  },[toast])
 
 
   // delete All Nodes of a project
@@ -498,7 +498,7 @@ const updatedNodePosition = useCallback(async(nodeid : string, new_X :number , n
   } catch (error) {
     console.log(error ?? "failed to update Position")
   }
-},[checkPostitionUpdated,parentNodePosition.x,parentNodePosition.y,toast])
+},[checkPostitionUpdated,toast])
 
 // updating Background Color of Node
 async function updateBgColorOfnode(nodeid : string, bgColorCode : string) {
