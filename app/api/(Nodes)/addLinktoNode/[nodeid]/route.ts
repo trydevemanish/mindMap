@@ -6,6 +6,7 @@ export async function PUT(req:Request) {
     try {
 
         await connectDb()
+
         const { link } = await req.json()
 
         const url = new URL(req.url);
@@ -27,7 +28,8 @@ export async function PUT(req:Request) {
 
         const linkAdded = await nodeModel.findByIdAndUpdate(
             nodeid,
-            {link : link}
+            {$set : { link : link }},
+            {new : true}
         )
 
         if(!linkAdded){
@@ -36,6 +38,8 @@ export async function PUT(req:Request) {
                 {status : 400}
             )
         }
+
+        await linkAdded.save({ validateBeforeSave : true })
 
         return NextResponse.json(
             {message : "Link Added Successfully", data : linkAdded},

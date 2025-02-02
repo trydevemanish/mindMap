@@ -79,6 +79,12 @@ export default function Page() {
 
       if(res.status != 201){
         console.log("Error While creatinig Node in DB")
+        const errorText = await res.text();
+          toast({
+            title : errorText,
+            className:'w-[300px] text-sm'
+          })
+        return;
       }
 
       setCheckCreatedNewNode(!checkCreatedNewNode)
@@ -97,6 +103,12 @@ export default function Page() {
 
         if(res.status != 200){
           console.log(res)
+          const errorText = await res.text();
+          toast({
+            title : errorText,
+            className:'w-[300px] text-sm'
+          })
+          return;
         }
 
         const data = await res.json()
@@ -191,17 +203,18 @@ export default function Page() {
         body : JSON.stringify({ title : "New Node", position : { "x" : nodePositon.x , "y" : nodePositon.y }, parentNodeID : parent_id })  
       })
 
-      const data = await res.json()
-
+      
       if(res.status != 201){
         console.log("Error While creatinig Node in DB")
-
+        const errorText = await res.text();
         toast({
-          title : data?.message,
-          className:"w-[300px]"
-        }) 
+          title : errorText,
+          className:'w-[300px] text-sm'
+        })
+        return;
       }
-
+      
+      const data = await res.json()
       setCheckCreatedNewNode(!checkCreatedNewNode)
       
       toast({
@@ -224,7 +237,12 @@ export default function Page() {
       })
     
       if(res.status != 200){
-        console.log(res)
+        const errorText = await res.text();
+          toast({
+            title : errorText,
+            className:'w-[300px] text-sm'
+          })
+          return;
       }
 
       const data = await res.json();
@@ -241,7 +259,8 @@ export default function Page() {
     }
   },[checkNodeDeleted,toast])
 
-  async function toFindSingleNodeDetail(id :string){
+
+  const toFindSingleNodeDetail = useCallback(async(id :string)  => {
     try {
 
       if(!id){
@@ -257,8 +276,15 @@ export default function Page() {
       }
 
       const res = await fetch(`/api/fetchSingleNode/${id}`)
+
       if(res.status != 200){
         console.log(res)
+        const errorText = await res.text();
+          toast({
+            title : errorText,
+            className:'w-[300px] text-sm'
+          })
+          return;
       } 
 
       const data = await res.json()
@@ -276,7 +302,8 @@ export default function Page() {
     } catch (error) {
       console.log(error ?? "Internal Server error")
     }
-  }
+  },[nodeID,selectedNode,totalChildNodeCount,parentNodePosition.x,parentNodePosition.y,toast])
+
 
   // delete All Nodes of a project
   async function deleteAllNodes(projectIdTobepassed:string) {
@@ -288,6 +315,12 @@ export default function Page() {
 
       if(res.status != 200){
         console.log(res)
+        const errorText = await res.text();
+          toast({
+            title : errorText,
+            className:'w-[300px] text-sm'
+          })
+          return;
       }
 
       const data = await res.json() 
@@ -363,6 +396,12 @@ async function downloadInPdfFormat(){
 
     if(!res.ok){
       console.log("Failed to generate PDF")
+      const errorText = await res.text();
+          toast({
+            title : errorText,
+            className:'w-[300px] text-sm'
+          })
+          return;
     }
 
     const blob = await res.blob();
@@ -433,29 +472,33 @@ const handleNodeDragStop = (event: React.MouseEvent, node: Node) => {
 }
 
 
-
-// function to update fields 
-async function updatedNodePosition(nodeid : string, new_X :number , new_Y : number) {
+const updatedNodePosition = useCallback(async(nodeid : string, new_X :number , new_Y : number) => {
   try {
 
-     const res = await fetch(`/api/changeNodePosition/${nodeid}`,{
+      const res = await fetch(`/api/changeNodePosition/${nodeid}`,{
       method: "PUT",
       headers : {
         "Content-Type" : "application/json"
       },
       body : JSON.stringify({ new_X, new_Y })
-     })
+      })
 
-     if(res.status != 200){
-      console.log("failed res data",res)
-     }
+      if(res.status != 200){
+        console.log(res)
+        const errorText = await res.text();
+            toast({
+              title : errorText,
+              className:'w-[300px] text-sm'
+            })
+            return;
+      }
 
-     setCheckPostitionUpdated(!checkPostitionUpdated)
+      setCheckPostitionUpdated(!checkPostitionUpdated)
     
   } catch (error) {
     console.log(error ?? "failed to update Position")
   }
-}
+},[checkPostitionUpdated,parentNodePosition.x,parentNodePosition.y,toast])
 
 // updating Background Color of Node
 async function updateBgColorOfnode(nodeid : string, bgColorCode : string) {
@@ -471,6 +514,12 @@ async function updateBgColorOfnode(nodeid : string, bgColorCode : string) {
 
     if(res.status != 200){
       console.log(res)
+      const errorText = await res.text();
+          toast({
+            title : errorText,
+            className:'w-[300px] text-sm'
+          })
+          return;
     }
 
     setCheckBgColorChange(!checkBgColorChange)
@@ -494,15 +543,18 @@ async function updatedText(nodeid :string, updatedText :string){
       body : JSON.stringify({ updatedText })
     })
 
-    const data = await res.json()
-
+    
     if(res.status != 200){
-      toast({
-        title : data?.message,
-        className:"w-[300px]"
-      })
+      console.log(res)
+      const errorText = await res.text();
+          toast({
+            title : errorText,
+            className:'w-[300px] text-sm'
+          })
+          return;
     }
-
+    
+    const data = await res.json()
 
     toast({
       title : data?.message,
@@ -514,11 +566,15 @@ async function updatedText(nodeid :string, updatedText :string){
     
   } catch (error) {
      console.log(error ?? "failed to update text")
+  } finally {
+    setStateButtonLoaded(false)
   }
 }
 
+
 // async function to update Link 
-async function UpdateAddLink(nodeid : string,link:string) {
+
+async function UpdateAddLink(nodeid : string,linktext:string) {
   try {
 
     setStateButtonLoaded(true)
@@ -528,19 +584,21 @@ async function UpdateAddLink(nodeid : string,link:string) {
       headers : {
         "Content-Type" : "application/json"
       },
-      body : JSON.stringify({ link })
+      body : JSON.stringify({ link : linktext })
     })
 
-    const data = await res.json()
-
+    
     if(res.status != 200){
       console.log(res)
-      toast({
-        title : data?.message,
-        className:"w-[300px]"
-      }) 
+      const errorText = await res.text();
+          toast({
+            title : errorText,
+            className:'w-[300px] text-sm'
+          })
+          return;
     }
-
+    
+    const data = await res.json()
 
     toast({
       title : data?.message,
@@ -548,11 +606,12 @@ async function UpdateAddLink(nodeid : string,link:string) {
     }) 
 
     setStateButtonLoaded(false)
-
     setCheckLinkUpdated(!checkLinkUpdated)
     
   } catch (error) {
     console.log(error ?? "failed to update link")
+  } finally { 
+    setStateButtonLoaded(false)
   }
 }
 
@@ -562,13 +621,17 @@ async function handleFindNodeUrlLink(nodeid:string) {
 
     const res = await fetch(`/api/findNodeLinkUrl/${nodeid}`)
 
-    const data = await res.json()
     if(res.status != 200){
+      console.log(res)
+      const errorText = await res.text();
       toast({
-          title : data?.message,
-          className:"w-[300px]"
-      }) 
+        title : errorText,
+        className:'w-[300px] text-sm'
+      })
+      return;
     }
+    
+    const data = await res.json()
 
     toast({
         title : data?.message,
@@ -679,6 +742,8 @@ async function handleFindNodeUrlLink(nodeid:string) {
           deleteAllNodes={deleteAllNodes}
           handleFindNodeUrlLink={handleFindNodeUrlLink}
           buttonStateChecker={stateButtonLoaded}
+          checkLinkUpdated={checkLinkUpdated}
+          setCheckLinkUpdated={setCheckLinkUpdated}
       />
       }
     </ReactFlow>

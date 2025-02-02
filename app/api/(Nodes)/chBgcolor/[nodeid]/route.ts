@@ -42,6 +42,8 @@ export async function PUT(req:Request) {
             )
         }
 
+        await bgUpdated.save({ validateBeforeSave : true })
+
         return NextResponse.json(
             {message : "Background Color Updated Successfully", data : bgUpdated},
             {status : 200}

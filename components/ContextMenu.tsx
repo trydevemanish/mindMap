@@ -1,5 +1,5 @@
 "use client"
-import React, { useState } from 'react';
+import React, { useState,useCallback } from 'react';
 import { Button } from "@/components/ui/button"
 
 import {
@@ -80,7 +80,7 @@ export default function ContextMenu({
     }
 
     const handleUpdateTextofNode = () => {
-      updatedText(id,inputText)
+        updatedText(id,inputText)
     }
 
     const handleAddLInk = () => {
@@ -108,13 +108,13 @@ export default function ContextMenu({
       <div onClick={handleDeleteAllNodes} className='cursor-pointer pl-3 pr-3 pb-2 hover:bg-zinc-50 hover:rounded'>Delete All Nodes</div>
       <div onClick={handleOpenLink} className='cursor-pointer pl-3 pr-3 pb-2 hover:bg-zinc-50 hover:rounded'>Open Link</div>
       <div className='pl-3 pr-3 pb-2 hover:bg-zinc-50 hover:rounded'>
-            <Dialog >
+            <Dialog>
               <DialogTrigger asChild>
                  <p className="cursor-pointer">Add Link</p>
               </DialogTrigger>
               <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                <DialogTitle onClick={onClick}>Add Link</DialogTitle>
+                <DialogTitle >Add Link</DialogTitle>
                   <DialogDescription>
                     Enter the Link....
                   </DialogDescription>
@@ -138,8 +138,8 @@ export default function ContextMenu({
             </Dialog>
       </div>
       <div className='pl-3 pr-3 pb-2 hover:bg-zinc-50 hover:rounded'>
-      <Dialog >
-              <DialogTrigger asChild>
+      <Dialog>
+              <DialogTrigger asChild  >
                  <p className="cursor-pointer">Edit Text</p>
               </DialogTrigger>
               <DialogContent className="sm:max-w-[425px]">

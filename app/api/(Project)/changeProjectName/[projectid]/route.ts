@@ -35,6 +35,8 @@ export async function PUT(req:Request) {
             )
         }
 
+        await updatedProjectName.save({ validateBeforeSave : true })
+
         return NextResponse.json(
             {message : "Updationn Success",data : updatedProjectName},
             {status : 200}

@@ -66,7 +66,9 @@ export default function Home() {
         })
     
         if(res.status != 201){
-          console.log(res ?? "failed to Create")
+          const errorText = await res.text();
+          console.error(`Failed to create: ${errorText}`);
+          return;
         }
 
         const data = await res.json()
@@ -82,8 +84,10 @@ export default function Home() {
                 
       } catch (error) {
         console.log(error ?? "Internal Server Issue")
+      } finally {
+        setStateButtonLoaded(false)
       }
-    },[stateButtonLoaded,newProjectCreated,toast])
+    },[stateButtonLoaded,newProjectCreated,toast,projectName,description])
 
 
     // // delete a Project
@@ -100,7 +104,12 @@ export default function Home() {
         })
 
         if(res.status != 200){
-          console.log(res)
+          const errorText = await res.text();
+          toast({
+            title : errorText,
+            className:'w-[300px] text-sm'
+          })
+          return;
         }
 
         const data = await res.json()
@@ -138,7 +147,12 @@ export default function Home() {
         })
 
         if(res.status != 200){
-          console.log(res)
+          const errorText = await res.text();
+          toast({
+            title : errorText,
+            className:'w-[300px] text-sm'
+          })
+          return;
         }
 
         const data = await res.json()
@@ -152,7 +166,7 @@ export default function Home() {
         
       } catch (error) {
         console.log(error ?? "Internal Server Error")
-      }
+      } 
     },[updatingProjectName,toast])
 
     // fetch all the project details
@@ -163,7 +177,12 @@ export default function Home() {
             const res = await fetch("/api/fetchProject")
     
             if(res.status != 200){
-              console.log(res)
+              const errorText = await res.text();
+              toast({
+                title : errorText,
+                className:'w-[300px] text-sm'
+              })
+              return;
             }
     
             const data = await res.json()
