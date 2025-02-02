@@ -32,8 +32,6 @@ export async function POST(req : Request) {
             )
         }
 
-        res.save({ validateBeforeSave : true })
-
         return NextResponse.json(
             { message : "Created new proj.." , data : res },
             { status : 201 }
