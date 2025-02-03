@@ -7,26 +7,27 @@ type connectionObject = {
 const connection : connectionObject = {isConnected : 0}
 
 export async function connectDb():Promise<void> {
-    if(connection.isConnected){
-    } else {
-        try {
 
-            const mongoConnectionString = process.env.MONGO_URI
-            const db_name = process.env.DB_NAME
+    if (mongoose.connection.readyState >= 1) {
+        console.log("Using existing database connection.");
+        return;
+    }
 
-            const controller = new AbortController();
-            const timeout = setTimeout(() => controller.abort(), 5000);
+    try {
 
-            const db = await mongoose.connect(`${mongoConnectionString}${db_name}`,{
-                serverSelectionTimeoutMS: 5000, // 5 seconds
-                socketTimeoutMS: 45000,
-            })
-            clearTimeout(timeout);  
-            connection.isConnected = db.connections[0].readyState
-            console.log("Mongo DB connected success...")
-            
-        } catch (error) {
-            console.error("Connecting Database Failed",error)
-        }
+        const mongoConnectionString = process.env.MONGO_URI
+        const db_name = process.env.DB_NAME
+
+        await mongoose.connect(`${mongoConnectionString}${db_name}`,{
+            serverSelectionTimeoutMS: 5000, 
+            socketTimeoutMS: 45000,
+        })
+
+        connection.isConnected = mongoose.connection.readyState;
+        console.log("✅ MongoDB connected successfully!");
+
+        
+    } catch (error) {
+        console.error("Connecting Database Failed",error)
     }
 }

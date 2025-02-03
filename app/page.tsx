@@ -65,8 +65,6 @@ export default function Home() {
           body : JSON.stringify({ projectName : projectName, description : description })
         })
 
-        console.log(res)
-    
         if(!res.ok){
           const errorText = await res.text();
           console.error(`Failed to create: ${errorText}`);
@@ -80,8 +78,6 @@ export default function Home() {
         }
 
         const data = await res.json()
-
-        console.log(data)
 
         setNewProjectCreated(!newProjectCreated)
 
