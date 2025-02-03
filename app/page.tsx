@@ -52,7 +52,8 @@ export default function Home() {
 
     
     // create a new Project 
-    const createProject = useCallback(async() => {
+
+    async function createProject(){
       try {
 
         setStateButtonLoaded(true)
@@ -64,16 +65,13 @@ export default function Home() {
           },
           body : JSON.stringify({ projectName : projectName, description : description })
         })
-
+    
         if(!res.ok){
           const errorText = await res.text();
-          console.error(`Failed to create: ${errorText}`);
           toast({
-            title: "Failed to create project",
-            description: errorText,
-            variant: "destructive",
-            className: "w-[300px] text-sm font-light",
-          });
+            title : errorText,
+            className:'w-[300px] text-sm'
+          })
           return;
         }
 
@@ -88,57 +86,51 @@ export default function Home() {
 
       } catch (error) {
         console.log(error ?? "Internal Server Issue")
-        toast({
-          title: "Internal Server Error",
-          description: "Something went wrong. Please try again.",
-          variant: "destructive",
-          className: "w-[300px] text-sm font-light",
-        });
       } finally {
         setStateButtonLoaded(false)
       }
-    },[newProjectCreated,toast,projectName,description])
+    }
 
 
-    // // delete a Project
-    const deleteProject = useCallback(async(projectid : string) => {
+    async function deleteProject(projectid : string) {
       try {
 
+       toast({
+         title : `project deleting ...`,
+         className:"w-[300px] text-sm font-light"
+       })
+
+       const res = await fetch(`/api/deleteProject/${projectid}`,{
+         method : "DELETE"
+       })
+
+       if(!res.ok){
+        const errorText = await res.text();
         toast({
-          title : `project deleting ...`,
-          className:"w-[300px] text-sm font-light"
+          title : errorText,
+          className:'w-[300px] text-sm'
         })
+        return;
+      }
 
-        const res = await fetch(`/api/deleteProject/${projectid}`,{
-          method : "DELETE"
-        })
+       const data = await res.json()
 
-        if(res.status != 200){
-          const errorText = await res.text();
-          toast({
-            title : errorText,
-            className:'w-[300px] text-sm'
-          })
-          return;
-        }
+       setProjectDeletd(!projectDeleted)
 
-        const data = await res.json()
-
-        setProjectDeletd(!projectDeleted)
-
-        toast({
-          title : data?.message,
-          className:"w-[300px] text-sm font-light"
-        })
-        
-       } catch (error) {
-          console.log(error ?? "Inter Server Issue")
-       }
-    },[projectDeleted,toast])
+       toast({
+         title : data?.message,
+         className:"w-[300px] text-sm font-light"
+       })
+       
+      } catch (error) {
+         console.log(error ?? "Inter Server Issue")
+      }
+   }   
 
 
     // update Project Name 
-    const updateProjectName = useCallback(async(projectid:string,newProjectName : string) => {
+
+    async function updateProjectName(projectid:string,newProjectName : string) {
       try {
 
         setUpdatingProjectName(true)
@@ -156,7 +148,7 @@ export default function Home() {
           body : JSON.stringify({ newProjectName : newProjectName })
         })
 
-        if(res.status != 200){
+        if(!res.ok){
           const errorText = await res.text();
           toast({
             title : errorText,
@@ -171,13 +163,13 @@ export default function Home() {
           title : data?.message,
           className:"w-[300px] text-sm font-light"
         })
-
-        setUpdatingProjectName(false)
         
       } catch (error) {
         console.log(error ?? "Internal Server Error")
-      } 
-    },[toast])
+      } finally {
+        setUpdatingProjectName(false)
+      }
+    }
 
     // fetch all the project details
     useEffect(() => {
