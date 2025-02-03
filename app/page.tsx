@@ -64,6 +64,8 @@ export default function Home() {
           },
           body : JSON.stringify({ projectName : projectName, description : description })
         })
+
+        console.log(res)
     
         if(res.status != 201){
           const errorText = await res.text();
@@ -72,6 +74,8 @@ export default function Home() {
         }
 
         const data = await res.json()
+
+        console.log(data)
 
         setNewProjectCreated(!newProjectCreated)
 

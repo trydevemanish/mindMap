@@ -9,7 +9,7 @@ export async function POST(req : Request) {
 
         const { projectName, description } = await req.json()
 
-        if(!projectName && !description){
+        if(!projectName || !description){
             return NextResponse.json(
                 { message : "Invalid Inputs field" },
                 { status : 404 }
@@ -31,6 +31,8 @@ export async function POST(req : Request) {
                 { status : 404 }
             )
         }
+
+        console.log("project created ...")
 
         return NextResponse.json(
             { message : "Created new proj.." , data : res },
