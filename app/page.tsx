@@ -67,9 +67,15 @@ export default function Home() {
 
         console.log(res)
     
-        if(res.status != 201){
+        if(!res.ok){
           const errorText = await res.text();
           console.error(`Failed to create: ${errorText}`);
+          toast({
+            title: "Failed to create project",
+            description: errorText,
+            variant: "destructive",
+            className: "w-[300px] text-sm font-light",
+          });
           return;
         }
 
@@ -84,10 +90,14 @@ export default function Home() {
           className:"w-[300px] text-sm font-light"
         }) 
 
-        setStateButtonLoaded(false)
-                
       } catch (error) {
         console.log(error ?? "Internal Server Issue")
+        toast({
+          title: "Internal Server Error",
+          description: "Something went wrong. Please try again.",
+          variant: "destructive",
+          className: "w-[300px] text-sm font-light",
+        });
       } finally {
         setStateButtonLoaded(false)
       }
