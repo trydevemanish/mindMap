@@ -2,7 +2,7 @@
 
 import { useParams } from 'next/navigation'
 import React, { useEffect,useState,useCallback, useRef } from 'react'
-import { DownloadCloud,Share2Icon } from 'lucide-react';
+import { DownloadCloud,Share2Icon,StarIcon } from 'lucide-react';
 
 import {
   ReactFlow,
@@ -41,6 +41,7 @@ import { Menu,Position } from '@/types/types';
 import { getURL } from 'next/dist/shared/lib/utils';
 import { useToast } from "@/hooks/use-toast"
 import { NodeDataType } from '@/types/types';
+import Link from 'next/link';
 
 export default function Page() { 
   const [nodeData,setNodeData] = useState<NodeDataType[]>([]);
@@ -52,6 +53,7 @@ export default function Page() {
   const [menu, setMenu] = useState<Menu>(null);
   const ref = useRef<HTMLDivElement>(null); 
   const [shareInput,setShareInput] = useState("");
+  const [projectName,setProjectName] = useState("")
 
   const [checkPostitionUpdated,setCheckPostitionUpdated] = useState(false)
   const [checkCreatedNewNode,setCheckCreatedNewNode] = useState<boolean>(false);
@@ -646,6 +648,33 @@ async function handleFindNodeUrlLink(nodeid:string) {
 }
 
 
+useEffect(() => {
+  const fetchProjectDetail = async() => {
+    try {
+
+      const res = await fetch(`/api/fetchSingleProject/${projectid}`)
+
+      if(!res.ok){
+        console.log(res)
+        const errorText = await res.text();
+        toast({
+          title : errorText,
+          className:'w-[300px] text-sm'
+        })
+        return;
+      }
+
+      const data = await res.json()
+
+      setProjectName(data?.data?.projectName)
+      
+    } catch (error) {
+      console.log(error ?? "Internal Error")
+    }
+  }
+  fetchProjectDetail()
+})
+
   const onNodesChange = useCallback(
     (changes) => setNodes((nds) => applyNodeChanges(changes, nds)),
     [],
@@ -663,16 +692,27 @@ async function handleFindNodeUrlLink(nodeid:string) {
 
   return (
     <div style={{ width: '100vw', height: '100vh' }}>
-        <div className='absolute right-8 z-10'>
+
+      <div className='absolute left-0 z-10 pt-3 flex items-center gap-5 px-3'>
+        <p className='bg-black text-white text-xs px-4 py-1 rounded-md shadow shadow-neutral-400 opacity-75 xs:hidden xs:invisble md:visible md:block'>{projectName}</p>
+        <Link href={'https://github.com/manishSharma1-dev/mindMap'} target='_blank'>
+          <p className='bg-black text-white text-xs px-4 py-1 rounded-md shadow shadow-neutral-400 opacity-75 flex gap-2 items-center'>
+            <span><StarIcon className='xs:size-2 md:size-3'/></span>
+            <span className='xs:text-[8px] md:text-xs'>on github</span>
+          </p>
+        </Link>
+      </div>
+
+        <div className='absolute xs:right-0 md:right-8 z-10'>
           
           {/* this div part is for download part  */}
-          <div className='pt-3 px-6 flex justify-end gap-8 z-50'>
+          <div className='pt-3 px-6 flex justify-end md:gap-8 xs:gap-3 z-50'>
               <Select onValueChange={handleDownloadFormat}>
-                <SelectTrigger className="w-[80px]">
-                  <SelectValue className='placeholder:text-xs' placeholder={
-                    <div className='flex gap-2'>
-                      <DownloadCloud size={15} />
-                      <span className='text-xs'>as</span>
+                <SelectTrigger className="md:w-[80px] xs:w-[60px] xs:h-6 md:h-9">
+                  <SelectValue className='placeholder:text-xs py-0' placeholder={
+                    <div className='flex gap-1 items-center'>
+                      <DownloadCloud className='xs:size-2 md:size-3' />
+                      <span className='xs:text-[8px] md:text-xs'>as</span>
                     </div>
                   }/>
                 </SelectTrigger>
@@ -683,13 +723,14 @@ async function handleFindNodeUrlLink(nodeid:string) {
                   </SelectGroup>
                 </SelectContent>
               </Select>
+
               {/* this part is for sharing the page  */}
               <div>
                   <Dialog>
                     <DialogTrigger asChild onClick={constructShareUrl}>
-                      <button className='flex rounded border px-4 py-2 gap-1 items-center justify-center'>
-                        <span className='text-xs cursor-pointer'>Share</span>
-                        <Share2Icon size={13} />
+                      <button className='flex rounded border md:px-4 xs:px-3 md:py-2 xs:py-1 gap-1 items-center justify-center'>
+                        <span className='xs:text-[8px] md:text-xs cursor-pointer'>Share</span>
+                        <Share2Icon className='size-2' />
                       </button>
                     </DialogTrigger>
                     <DialogContent className="sm:max-w-[425px]">

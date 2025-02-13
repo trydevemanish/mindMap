@@ -1,9 +1,9 @@
 "use client"
 import { Star } from "lucide-react"
 import React from "react"
-import { useEffect, useState,useCallback } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "../components/ui/button"
-import { Loader2 } from "lucide-react"
+import { Loader2,Plus, X } from "lucide-react"
 import { ProjectType } from "@/types/types"
 import {
   Dialog,
@@ -46,6 +46,8 @@ export default function Home() {
   const [updatingProjectName,setUpdatingProjectName] = useState(false)
   const [darkTheme,setDarkTheme] = useState("")
   const [stateButtonLoaded,setStateButtonLoaded] = useState(false)
+
+  const [openSidebar,setOpenSidebar] = useState(false)
 
     const { toast } = useToast()
     const router = useRouter()
@@ -234,10 +236,10 @@ export default function Home() {
 
   return(
     <main className={`${darkTheme == 'dark' ? 'dark' : 'light'}`}>
-      <div className="grid grid-cols-[16vw_1fr] min-h-screen overflow-hidden dark:border-white dark:text-white dark:bg-black">
+      <div className="md:grid md:grid-cols-[16vw_1fr] min-h-screen overflow-hidden dark:border-white dark:text-white dark:bg-black">
 
           {/* sidebar part  */}
-          <div className="min-h-screen border-r dark:border-white border-black text-sm px-4 py-3">
+          <div className="min-h-screen border-r dark:border-white border-black text-sm px-4 py-3   xs:hidden xs:invisible md:block md:visible">
             {/* <h2 className="border-b px-2 py-1">Templates</h2>
             <div className="flex flex-col pl-3 pt-2 pb-2 pr-3 gap-2">
               <p className="cursor-pointer">Template 1</p>
@@ -291,13 +293,77 @@ export default function Home() {
               <span className="dark:text-black opacity-75">Generate with AI</span>
               <span><Star size={10} /></span>
             </p>
-          </div>
+          </div>  
+
+          {/* open sidebar  */}
+
+          {openSidebar ? (
+            <div className="min-h-screen border-r dark:border-white border-black text-sm px-4 py-3 md:hidden md:invisible xs:visible xs:block w-72 animate-out">
+              <div className="flex justify-end">
+                <X className="size-6" onClick={() => setOpenSidebar(!openSidebar)}/>
+              </div>
+              <div className="bg-purple-100 cursor-pointer rounded my-2 self-center flex justify-center">
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <button className="px-2 py-1 opacity-85 self-center dark:text-black">New Project</button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[425px]">
+                      <DialogHeader>
+                        <DialogTitle className="text-base">Create Project.</DialogTitle>
+                        <DialogDescription className="opacity-70 text-sm">
+                          Enter the project name and description.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="grid gap-4 py-4">
+                        <div className="grid grid-cols-4 items-center gap-4">
+                          <Label htmlFor="Project Name" className="text-right">
+                            Project name
+                          </Label>
+                          <Input
+                            id="Project Name"
+                            className="col-span-3 text-sm"
+                            value={projectName}
+                            onChange={(e) => setProjectName(e.target.value)}
+                          />
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                          <Label htmlFor="description" className="text-right">
+                            Description
+                          </Label>
+                          <textarea
+                            id="description"
+                            className="col-span-3 px-2 py-1 text-sm border border-black rounded-md"
+                            value={description}
+                            onChange={(e) => setdescription(e.target.value)}
+                          />
+                        </div>
+                      </div>
+                      <DialogFooter>
+                        <Button type="submit" onClick={createProject} className="pl-10 pr-10 "> 
+                                  {stateButtonLoaded === true ? <Loader2 size={12} className="animate-spin"/> : "Create"}
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+              </div>
+              <p className="flex opacity-40 items-center border-b bg-violet-100 rounded py-1 cursor-pointer justify-center gap-1">
+                <span className="dark:text-black opacity-75">Generate with AI</span>
+                <span><Star size={10} /></span>
+              </p>
+            </div>
+          ) : (
+            <>
+            </>
+          )}
 
           {/* Main part  */}
           <div className="min-h-screen px-4">
 
             <div className="flex justify-between items-center border-b py-1">
-              <p className="text-sm">Generate Your Mindmap</p>
+              <p className="text-sm flex gap-1 items-center">
+                <span><Plus className="size-5 cursor-pointer xs:visible xs:block md:hidden md:invisible" onClick={() => setOpenSidebar(!openSidebar)} /></span>
+                <span className="xs:text-[14px] md:text-sm">Generate Your Mindmap</span>
+              </p>
               <div>
                 <Select onValueChange={handleThemeFormat}>
                   <SelectTrigger className="w-[100px]">
@@ -315,11 +381,11 @@ export default function Home() {
 
             <div>
               {/* fetched data layout  */}
-              <div className='flex justify-around pt-7 border-b opacity-70 text-sm'>
+              <div className='flex justify-around pt-7 border-b  xs:opacity-90 xs:text-[13px] md:opacity-70 md:text-sm'>
                   <p>Index</p>
                   <p>Project Name</p>
-                  <p>Project Description</p>
-                  <p>created At</p> 
+                  <p>Project desc..</p>
+                  <p>Created at</p> 
               </div>
 
               {/* showing project data result  */}
