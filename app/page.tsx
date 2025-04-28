@@ -36,10 +36,37 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
+
+const diagramStyleToChoose = [
+  {
+    stylename : 'mindmap'
+  },
+  {
+    stylename : 'sequenceDiagram'
+  },
+  {
+    stylename : 'erDiagram'
+  },
+  {
+    stylename : 'timeline'
+  },
+  {
+    stylename : 'kanban'
+  },
+  {
+    stylename : 'quadrantChart'
+  },
+  {
+    stylename : 'packet-beta'
+  },
+]
+
 export default function Home() {
   const [projectdata, setProjectData] = useState<ProjectType[] | null>([])
   const [projectName,setProjectName] = useState("")
   const [description,setdescription] = useState("")
+  const [selectedStyle,setSelectedStyle] = useState(0)
+  const [selectedStyleName,setSelectedStyleName] = useState("mindmap")
 
   const [newProjectCreated,setNewProjectCreated] = useState(false)
   const [projectDeleted,setProjectDeletd] = useState(false);
@@ -52,7 +79,6 @@ export default function Home() {
     const { toast } = useToast()
     const router = useRouter()
 
-    
     // create a new Project 
 
     async function createProject(){
@@ -233,19 +259,13 @@ export default function Home() {
       }
     }
 
-
   return(
     <main className={`${darkTheme == 'dark' ? 'dark' : 'light'}`}>
       <div className="md:grid md:grid-cols-[16vw_1fr] min-h-screen overflow-hidden dark:border-white dark:text-white dark:bg-black">
 
           {/* sidebar part  */}
-          <div className="min-h-screen border-r dark:border-white border-black text-sm px-4 py-3   xs:hidden xs:invisible md:block md:visible">
-            {/* <h2 className="border-b px-2 py-1">Templates</h2>
-            <div className="flex flex-col pl-3 pt-2 pb-2 pr-3 gap-2">
-              <p className="cursor-pointer">Template 1</p>
-              <p className="cursor-pointer">Template 2</p>
-            </div> */}
-            <div className="bg-purple-100 cursor-pointer rounded my-2 self-center flex justify-center">
+          <div className="min-h-screen border-r dark:border-white border-black text-sm px-4 py-3 xs:hidden xs:invisible md:block md:visible">
+            <div className="bg-violet-500 font-semibold font-sans text-white cursor-pointer rounded my-2 self-center flex justify-center">
                 <Dialog>
                   <DialogTrigger asChild>
                     <button className="px-2 py-1 opacity-85 self-center dark:text-black">New Project</button>
@@ -289,10 +309,66 @@ export default function Home() {
                   </DialogContent>
                 </Dialog>
             </div>
-            <p className="flex opacity-40 items-center border-b bg-violet-100 rounded py-1 cursor-pointer justify-center gap-1">
-              <span className="dark:text-black opacity-75">Generate with AI</span>
-              <span><Star size={10} /></span>
-            </p>
+
+            <div className="bg-violet-500 font-semibold font-sans text-white cursor-pointer rounded my-2 self-center flex justify-center">
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <button className="self-center dark:text-black">
+                              <p className="flex items-center bg-violet-500 font-sans rounded py-1 cursor-pointer justify-center gap-1">
+                      <span className="dark:text-black text-white">Generate with AI</span>
+                      <span><Star size={10} className="text-white" /></span>
+                    </p>
+                    </button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[560px]">
+                    <DialogHeader>
+                      <DialogTitle className="text-base">Generate diagram with Ai.</DialogTitle>
+                      <DialogDescription className="opacity-70 text-sm">
+                        What do you want to create..
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                      <div className="flex flex-col items-start gap-4">
+                        <Label htmlFor="description" className="text-right">
+                          What style you want your diagram to be.
+                        </Label>
+                        <div className="flex flex-wrap gap-5 items-center">
+                          {diagramStyleToChoose.map((data,idx) => (
+                            <p 
+                              key={idx} 
+                              onClick={() => {
+                                setSelectedStyle(idx)
+                                setSelectedStyleName(data?.stylename)
+                              }}
+                              className={`
+                                px-4 py-1 rounded-full text-sm cursor-pointer
+                                ${selectedStyle === idx ? 'bg-violet-500 text-white font-semibold ': 'bg-violet-200'}
+                              `}
+                            >{data?.stylename}</p>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="flex flex-col items-start gap-4">
+                        <Label htmlFor="description" className="text-right">
+                          Describe your diagram here
+                        </Label>
+                        <textarea
+                          id="description"
+                          className="col-span-3 px-2 py-1 text-sm border border-black rounded-md w-full"
+                          value={description}
+                          rows={7}
+                          onChange={(e) => setdescription(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                    <DialogFooter>
+                      <Button type="submit" onClick={createProject} className="pl-10 pr-10 "> 
+                                {stateButtonLoaded === true ? <Loader2 size={12} className="animate-spin"/> : "Create"}
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+            </div>
           </div>  
 
           {/* open sidebar  */}
@@ -381,11 +457,11 @@ export default function Home() {
 
             <div>
               {/* fetched data layout  */}
-              <div className='flex justify-around pt-7 border-b  xs:opacity-90 xs:text-[13px] md:opacity-70 md:text-sm'>
-                  <p>Index</p>
-                  <p>Project Name</p>
-                  <p>Project desc..</p>
-                  <p>Created at</p> 
+              <div className='grid grid-cols-4 pt-3 gap-[1px] border-b xs:text-[13px]  md:text-sm'>
+                  <p className="col-start-1 col-end-2 text-center bg-violet-500 py-1 text-white ">Index</p>
+                  <p className="col-start-2 col-end-3 text-center bg-violet-500 py-1 text-white ">Project Name</p>
+                  <p className="col-start-3 col-end-4 text-center bg-violet-500 py-1 text-white ">Project desc..</p>
+                  <p className="col-start-4 col-end-5 text-center bg-violet-500 py-1 text-white ">Created at</p> 
               </div>
 
               {/* showing project data result  */}
@@ -394,11 +470,11 @@ export default function Home() {
                   {projectdata.map((projectdatafeild : ProjectType,idx : number) => (
                     <ContextMenu key={idx}>
                       <ContextMenuTrigger>
-                        <div className="flex justify-around pt-5 border-b cursor-pointer opacity-85 text-[0.8rem]"  onClick={() => moveToworkflow(projectdatafeild?._id)}>
-                            <p>{idx}</p>
-                            <p>{projectdatafeild?.projectName}</p>
-                            <p>{makeShort(projectdatafeild?.description,15) ?? "-"}</p>
-                            <p>{projectdatafeild?.created_At ?? "-"}</p>
+                        <div className="grid grid-cols-4 pt-5 border-b cursor-pointer opacity-85 text-[0.8rem]"  onClick={() => moveToworkflow(projectdatafeild?._id)}>
+                            <p className="col-start-1 col-end-2 text-center">{idx}</p>
+                            <p className="col-start-2 col-end-3 text-center">{projectdatafeild?.projectName}</p>
+                            <p className="col-start-3 col-end-4 text-center">{makeShort(projectdatafeild?.description,25) ?? "-"}</p>
+                            <p className="col-start-4 col-end-5 text-center">{projectdatafeild?.created_At ?? "-"}</p>
                         </div>
                       </ContextMenuTrigger>
                       <ContextMenuContent>
