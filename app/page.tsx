@@ -155,7 +155,6 @@ export default function Home() {
       }
    }   
 
-
     // update Project Name 
 
     async function updateProjectName(projectid:string,newProjectName : string) {
@@ -256,6 +255,33 @@ export default function Home() {
           className:"w-[300px] text-sm font-light"
         })
         setDarkTheme(theme)
+      }
+    }
+
+    const handleGenerateMarkdown = async() => {
+      try {
+
+        setStateButtonLoaded(true)
+
+        const markdownGenerated = await fetch(`/api/generatemarkdown/${selectedStyleName}`,{
+          method : 'POST',
+          headers : {
+            'Content-Type' : 'application/json'
+          },
+          body : JSON.stringify({ description : description })
+        })
+
+        if(!markdownGenerated){
+          console.error(await markdownGenerated.text())
+          return ;
+        }
+
+        console.log(markdownGenerated)
+
+      } catch (error) {
+        console.error(`Issue Occured: ${error}`)
+      } finally {
+        setStateButtonLoaded(false)
       }
     }
 
@@ -362,7 +388,7 @@ export default function Home() {
                       </div>
                     </div>
                     <DialogFooter>
-                      <Button type="submit" onClick={createProject} className="pl-10 pr-10 "> 
+                      <Button type="submit" onClick={handleGenerateMarkdown} className="pl-10 pr-10 "> 
                                 {stateButtonLoaded === true ? <Loader2 size={12} className="animate-spin"/> : "Create"}
                       </Button>
                     </DialogFooter>
