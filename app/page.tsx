@@ -18,6 +18,7 @@ import { Input } from "../components/ui/input"
 import { Label } from "../components/ui/label"
 import { useRouter } from "next/navigation"
 import { useToast } from "@/hooks/use-toast"
+import useDataStore from "@/lib/useStore"
 
 import {
   ContextMenu,
@@ -280,6 +281,11 @@ export default function Home() {
 
         console.log(data?.message)
         console.log(data?.data)
+
+        // Set outside React
+        useDataStore.getState().setData(data?.data);
+        
+        router.push('/newpage')
 
       } catch (error) {
         console.error(`Issue Occured: ${error}`)
