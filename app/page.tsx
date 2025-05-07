@@ -276,7 +276,10 @@ export default function Home() {
           return ;
         }
 
-        console.log(markdownGenerated)
+        const data = await markdownGenerated.json()
+
+        console.log(data?.message)
+        console.log(data?.data)
 
       } catch (error) {
         console.error(`Issue Occured: ${error}`)
@@ -388,9 +391,13 @@ export default function Home() {
                       </div>
                     </div>
                     <DialogFooter>
-                      <Button type="submit" onClick={handleGenerateMarkdown} className="pl-10 pr-10 "> 
+                      <div className="flex flex-col gap-3 items-center justify-center w-full ">
+
+                      <Button type="submit" onClick={handleGenerateMarkdown} className="pl-20 pr-20 text-sm "> 
                                 {stateButtonLoaded === true ? <Loader2 size={12} className="animate-spin"/> : "Create"}
                       </Button>
+                      <p className="text-black text-xs">powered by google gemini.</p>
+                      </div>
                     </DialogFooter>
                   </DialogContent>
                 </Dialog>

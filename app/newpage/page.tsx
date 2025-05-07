@@ -2,40 +2,35 @@
 import Mermaid from "@/components/Mermaid";
 
 export default function Home() {
-  const mermaidChart = `    mindmap
-root((Full Stack Developer Learning Path))
-    Frontend
-        HTML
-        CSS
-        JavaScript
-        React
-        Angular
-        Vue.js
-    Backend
-        Node.js
-        Python
-        Java
-        PHP
-        Databases
-            SQL
-            NoSQL
-            MongoDB
-            PostgreSQL
-            MySQL
-    DevOps
-        Linux
-        Docker
-        Kubernetes
-        CI/CD
-        AWS
-        Azure
-        GCP
-    Databases
-        SQL
-        NoSQL
-        MongoDB
-        PostgreSQL
-        MySQL
+  const mermaidChart = `    erDiagram
+    Wallet {
+        string id
+        string name
+        string type
+    }
+    User {
+        string id
+        string username
+        string email
+        string password
+    }
+    Asset {
+        string id
+        string name
+        string symbol
+        string type
+        double balance
+    }
+    Transaction {
+        string id
+        string type
+        double amount
+        timestamp timestamp
+    }
+    User ||--o{ Wallet : owns
+    Wallet ||--o{ Asset : holds
+    Wallet ||--o{ Transaction : contains
+
 `
 
   return (

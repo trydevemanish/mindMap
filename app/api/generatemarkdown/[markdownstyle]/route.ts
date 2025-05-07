@@ -11,6 +11,8 @@ export async function POST(req:Request) {
         const url = new URL(req.url)
         const markdownstyle = url.pathname.split("/")[3]
 
+        console.log(markdownstyle)
+
         const {description} = await req.json()
 
         if (!description) { 
