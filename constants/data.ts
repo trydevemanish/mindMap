@@ -141,7 +141,6 @@ Task:
 - Only output pure Markdown content.
 
 Important Rules:
-- Always wrap output inside triple backticks with language specified as 'mermaid'  (e.g., ).
 - Only generate Markdown code.
 - Keep the diagram accurate and clean.
 - Do not invent extra content beyond the user description unless necessary for structure.
