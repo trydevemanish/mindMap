@@ -1,7 +1,12 @@
 import { create } from 'zustand';
 
+type datatype = {
+    description : string,
+    markdowndata : any
+}
+
 interface MyState {
-    data : any;
+    data : datatype;
     setData : (data:any) => void;
     clearData : () => void
 }

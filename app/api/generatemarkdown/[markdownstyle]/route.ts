@@ -75,8 +75,6 @@ export async function POST(req:Request) {
             )
         }
 
-        console.log(response);
-        
         return NextResponse.json(
             {message:'Markdown generated',data:response},
             {status:200}

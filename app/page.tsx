@@ -279,11 +279,18 @@ export default function Home() {
 
         const data = await markdownGenerated.json()
 
-        console.log(data?.message)
-        console.log(data?.data)
+        if(!data){
+          console.error('No data received')
+          return;
+        }
+
+        const Passingdata = {
+          description : description,
+          markdowndata : data?.data
+        }
 
         // Set outside React
-        useDataStore.getState().setData(data?.data);
+        useDataStore.getState().setData(Passingdata);
         
         router.push('/newpage')
 
