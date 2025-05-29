@@ -25,23 +25,19 @@ export async function POST(req:Request) {
         console.log(description);
 
         const propmtdescription = propmt;
-        const sampletext = "this is an sample example that shows how the structure should look like ,"
+        const smapleexampletext = "Strictly follow the eact same structure as shown in the example to generate the markdown for mermaid compatible"
         let contenttobepassed = "";
 
         if(markdownstyle == 'mindmap'){
-            contenttobepassed = description + sampletext + MindmapExample;
+            contenttobepassed = description  + smapleexampletext +  MindmapExample;
         } else if (markdownstyle == 'sequenceDiagram') {
-            contenttobepassed = description + sampletext+SequenceDiagramExample;
+            contenttobepassed =  description + smapleexampletext + SequenceDiagramExample;
         } else if (markdownstyle == 'erDiagram') {
-            contenttobepassed = description +sampletext+ erDiagramExample;
+            contenttobepassed =  description + smapleexampletext +  erDiagramExample;
         } else if (markdownstyle == 'timeline') {
-            contenttobepassed = description +sampletext+ timelineExample;
+            contenttobepassed =  description + smapleexampletext +  timelineExample;
         } else if (markdownstyle == 'kanban') {
-            contenttobepassed = description +sampletext+ kanbanExample;
-        } else if (markdownstyle == 'quadrantChart') {
-            contenttobepassed = description +sampletext+ quadrantChartExample;
-        } else if (markdownstyle == 'packet-beta') {
-            contenttobepassed = description +sampletext+ packetbetaExample;
+            contenttobepassed =  description + smapleexampletext +  kanbanExample;
         } else {
             return NextResponse.json(
                 {
@@ -74,6 +70,8 @@ export async function POST(req:Request) {
                 {status:400}
             )
         }
+
+        console.log('response',response)
 
         return NextResponse.json(
             {message:'Markdown generated',data:response},

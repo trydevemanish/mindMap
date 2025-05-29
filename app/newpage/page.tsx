@@ -40,7 +40,13 @@ export default function Home() {
     }
   }
 
-//   const mermaidChart = `${data.markdowndata}`
+  const cleanedMermaid = data?.markdowndata
+  .replace(/^```mermaid\s*/i, "") 
+  .replace(/```$/, "")           
+  .trim();
+  
+  const mermaidChart = `   ${cleanedMermaid}
+ `
 
 
   return (
@@ -51,7 +57,7 @@ export default function Home() {
                 <LucideStepBack className="size-7 p-2 bg-violet-400 rounded-full stroke-white cursor-pointer" onClick={() => router.back()}  />
                 <p className="text-sm max-w-60 flex-wrap">Generated diagram.</p>
             </div>
-            <p className="max-w-72 text-sm">{data?.description}</p>
+            <p className="max-w-1/2 text-sm">{data?.description}</p>
          </div>
         <div className="col-start-2 col-end-3 flex justify-end" onClick={downloadInPdfFormat}>
             <button>
@@ -59,7 +65,7 @@ export default function Home() {
             </button>
         </div>
       </div>
-      {/* <Mermaid chart={mermaidChart}/> */}
+      <Mermaid chart={mermaidChart}/>
     </div>
   );
 }

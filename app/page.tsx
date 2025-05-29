@@ -54,12 +54,6 @@ const diagramStyleToChoose = [
   {
     stylename : 'kanban'
   },
-  {
-    stylename : 'quadrantChart'
-  },
-  {
-    stylename : 'packet-beta'
-  },
 ]
 
 export default function Home() {
