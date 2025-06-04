@@ -82,6 +82,28 @@ const timelineExample = `
             Bullet 4 : sub-point 4a : sub-point 4b
 `;
 
+const graphtpExample = `graph TD
+    A[Start] --> B{Beginner?};
+    B -- Yes --> C[Learn Python];
+    C --> D[Linear Algebra];
+    D --> E[Calculus];
+    E --> F[Statistics];
+    F --> G[Machine Learning Basics];
+    G --> H[Supervised Learning];
+    H --> I[Unsupervised Learning];
+    I --> J[Reinforcement Learning];
+    J --> K[Deep Learning];
+    K --> L[Model Building];
+    L --> M[Model Evaluation];
+    M --> N[Model Tuning];
+    N --> O[Deploy Models];
+    O --> P[Build Portfolio];
+    P --> Q{Ready for Internship?};
+    Q -- Yes --> R[Apply for Internships];
+    Q -- No --> S[Practice More];
+    S --> L;
+    B -- No --> H;`
+
 const kanbanExample = `
     kanban
   Todo
@@ -156,5 +178,6 @@ export {
     kanbanExample,
     quadrantChartExample,
     packetbetaExample,
+    graphtpExample,
     propmt
 }

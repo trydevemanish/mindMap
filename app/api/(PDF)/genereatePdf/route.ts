@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server';
 import puppeteer from "puppeteer";
 
-export async function GET(req: Request){
+export async function POST(req: Request){
     try {
+
+        const { description }: {description : string} = await req.json()
         
         const browser = await puppeteer.launch({
             headless : true,
@@ -11,13 +13,16 @@ export async function GET(req: Request){
 
         const page = await browser.newPage();
 
-        await page.goto(`${req.url}`, {
+        const url = new URL(req.url);
+        const baseUrl = `${url.protocol}//${url.host}`
+
+        await page.goto(`${baseUrl}/newpage`, {
             waitUntil: "networkidle0", 
-          });
+        });
       
         await page.setViewport({ width: 1200, height: 800 });
     
-        const pdfBuffer = await page.pdf({ path: "mindmap.pdf", format: "A4",printBackground: true });
+        const pdfBuffer = await page.pdf({ path: `${description.slice(0,30)}.pdf`, format: "A4",printBackground: true });
         
         await browser.close();
 

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { MindmapExample,SequenceDiagramExample,erDiagramExample,kanbanExample,packetbetaExample,quadrantChartExample,timelineExample,propmt } from '@/constants/data'
+import { MindmapExample,SequenceDiagramExample,erDiagramExample,kanbanExample,timelineExample,propmt,graphtpExample } from '@/constants/data'
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const ai = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
@@ -25,19 +25,21 @@ export async function POST(req:Request) {
         console.log(description);
 
         const propmtdescription = propmt;
-        const smapleexampletext = "Strictly follow the eact same structure as shown in the example to generate the markdown for mermaid compatible"
+        // const smapleexampletext = "Strictly follow the eact same structure as shown in the example to generate the markdown for mermaid compatible"
         let contenttobepassed = "";
 
         if(markdownstyle == 'mindmap'){
-            contenttobepassed = description  + smapleexampletext +  MindmapExample;
+            contenttobepassed = description  +  MindmapExample;
         } else if (markdownstyle == 'sequenceDiagram') {
-            contenttobepassed =  description + smapleexampletext + SequenceDiagramExample;
+            contenttobepassed =  description + SequenceDiagramExample;
         } else if (markdownstyle == 'erDiagram') {
-            contenttobepassed =  description + smapleexampletext +  erDiagramExample;
+            contenttobepassed =  description  +  erDiagramExample;
         } else if (markdownstyle == 'timeline') {
-            contenttobepassed =  description + smapleexampletext +  timelineExample;
+            contenttobepassed =  description  +  timelineExample;
         } else if (markdownstyle == 'kanban') {
-            contenttobepassed =  description + smapleexampletext +  kanbanExample;
+            contenttobepassed =  description  +  kanbanExample;
+        } else if (markdownstyle == 'graph TD') {
+            contenttobepassed =  description  +  graphtpExample;
         } else {
             return NextResponse.json(
                 {

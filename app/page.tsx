@@ -54,6 +54,9 @@ const diagramStyleToChoose = [
   {
     stylename : 'kanban'
   },
+  {
+    stylename : 'graph TD'
+  },
 ]
 
 export default function Home() {

@@ -13,7 +13,13 @@ export default function Home() {
   async function downloadInPdfFormat(){
     try {
   
-      const res = await fetch("/api/genereatePdf");
+      const res = await fetch("/api/genereatePdf",{
+        method : 'POST',
+        headers : {
+          'Content-Type': 'application/json'
+        },
+        body : JSON.stringify({ description:data?.description || "generatedDiagram" })
+      });
   
       if(!res.ok){
         console.log("Failed to generate PDF")
