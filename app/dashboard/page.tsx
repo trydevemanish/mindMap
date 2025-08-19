@@ -230,7 +230,7 @@ export default function Page() {
             setLoading(false)
           }
         }
-        // fetchProjectDetail()
+        fetchProjectDetail()
     },[newProjectCreated,projectDeleted,updatingProjectName,toast])
 
 
