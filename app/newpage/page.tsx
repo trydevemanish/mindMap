@@ -47,12 +47,11 @@ export default function Home() {
   }
 
   const cleanedMermaid = data?.markdowndata
-  .replace(/^```mermaid\s*/i, "") 
-  .replace(/```$/, "")           
+  .replace(/^```mermaid\s*/i, "")       
+  .replace(/```[\s\S]*$/, "")      
   .trim();
   
-  const mermaidChart = `   ${cleanedMermaid}
- `
+  const mermaidChart = ` ${cleanedMermaid}`
 
 
   return (

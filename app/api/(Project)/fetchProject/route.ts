@@ -4,8 +4,12 @@ import { connectDb } from "@/connections/connectDb";
 
 export async function GET() {
     try {
+
+        console.log('connecting db')
         
         await connectDb()
+
+        console.log('Calling fetch method')
 
         const res = await projectModel.find({})
 

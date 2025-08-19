@@ -53,7 +53,7 @@ export default function Page() {
   const [menu, setMenu] = useState<Menu>(null);
   const ref = useRef<HTMLDivElement>(null); 
   const [shareInput,setShareInput] = useState("");
-  const [projectName,setProjectName] = useState("")
+  const [projectName,setProjectName] = useState("project name")
 
   const [checkPostitionUpdated,setCheckPostitionUpdated] = useState(false)
   const [checkCreatedNewNode,setCheckCreatedNewNode] = useState<boolean>(false);
@@ -62,6 +62,7 @@ export default function Page() {
   const [checkNodeDeleted,setCheckodeDeleted] = useState(false);
   const [checkLinkUpdated,setCheckLinkUpdated] = useState(false);
   const [stateButtonLoaded,setStateButtonLoaded] = useState(false)
+  const [showsuggestionmsg,setShowsuggestionmsg] = useState(true)
 
   const [ parentNodePosition,setParentNodePosition] = useState<Position>({ x : 396.00 , y : 162.00 });
   const { projectid } = useParams()
@@ -100,6 +101,8 @@ export default function Page() {
   useEffect(() => {
     async function fetchallNodes(){
       try {
+
+        console.log('checking how many time this useeffect fetchallnode is called')
 
         const res = await fetch(`/api/getallNodes/${projectid}`)
 
@@ -648,32 +651,32 @@ async function handleFindNodeUrlLink(nodeid:string) {
 }
 
 
-useEffect(() => {
-  const fetchProjectDetail = async() => {
-    try {
+  useEffect(() => {
+    const fetchProjectDetail = async() => {
+      try {
 
-      const res = await fetch(`/api/fetchSingleProject/${projectid}`)
+        const res = await fetch(`/api/fetchSingleProject/${projectid}`)
 
-      if(!res.ok){
-        console.log(res)
-        const errorText = await res.text();
-        toast({
-          title : errorText,
-          className:'w-[300px] text-sm'
-        })
-        return;
+        if(!res.ok){
+          console.log(res)
+          const errorText = await res.text();
+          toast({
+            title : errorText,
+            className:'w-[300px] text-sm'
+          })
+          return;
+        }
+
+        const data = await res.json()
+
+        setProjectName(data?.data?.projectName)
+        
+      } catch (error) {
+        console.log(error ?? "Internal Error")
       }
-
-      const data = await res.json()
-
-      setProjectName(data?.data?.projectName)
-      
-    } catch (error) {
-      console.log(error ?? "Internal Error")
     }
-  }
-  fetchProjectDetail()
-})
+    fetchProjectDetail()
+  },[toast,projectid])
 
   const onNodesChange = useCallback(
     (changes) => setNodes((nds) => applyNodeChanges(changes, nds)),
@@ -691,17 +694,37 @@ useEffect(() => {
   );
 
   return (
-    <div style={{ width: '100vw', height: '100vh' }}>
-
-      <div className='absolute left-0 z-10 pt-3 flex items-center gap-5 px-3'>
-        <p className='bg-black text-white text-xs px-4 py-1 rounded-md shadow shadow-neutral-400 opacity-75 xs:hidden xs:invisble md:visible md:block'>{projectName}</p>
-        <Link href={'https://github.com/manishSharma1-dev/mindMap'} target='_blank'>
-          <p className='bg-black text-white text-xs px-4 py-1 rounded-md shadow shadow-neutral-400 opacity-75 flex gap-2 items-center'>
-            <span><StarIcon className='xs:size-2 md:size-3'/></span>
-            <span className='xs:text-[8px] md:text-xs'>on github</span>
-          </p>
-        </Link>
+   <div>
+    {
+      showsuggestionmsg ?
+      <div className='bg-zinc-50 min-h-screen w-full'>
+         <div className='flex flex-col items-center min-h-screen justify-center'>
+            <div className='bg-zinc-100 shadow-sm shadow-purple-50 rounded-md text-sm max-w-80'>
+              <p className='text-right font-semibold px-4 py-2 bg-purple-100 rounded'>
+                <span className='cursor-pointer' onClick={() => setShowsuggestionmsg(false)}>X</span>
+              </p>
+              <div className='px-8 py-5'>
+                <p className='text-center font-medium'>Small reminders...</p>
+                <div className='flex flex-col items-start gap-3 py-4'>
+                  <p className='text-xs font-thin opacity-70'>1. Right click on the node for getting options to make changes.</p>
+                  <p className='text-xs font-thin opacity-70'>2. Drag node to make changes in the position.</p>
+                </div>
+              </div>
+            </div>
+         </div>
       </div>
+      :
+      <div style={{ width: '100vw', height: '100vh' }}>
+
+        <div className='absolute left-0 z-10 pt-3 flex items-center gap-5 px-3'>
+          <p className='bg-black text-white text-xs px-4 py-1 rounded-md shadow shadow-neutral-400 opacity-75 xs:hidden xs:invisble md:visible md:block'>{projectName}</p>
+          <Link href={'https://github.com/manishSharma1-dev/mindMap'} target='_blank'>
+            <p className='bg-black text-white text-xs px-4 py-1 rounded-md shadow shadow-neutral-400 opacity-75 flex gap-2 items-center'>
+              <span><StarIcon className='xs:size-2 md:size-3'/></span>
+              <span className='xs:text-[8px] md:text-xs'>on github</span>
+            </p>
+          </Link>
+        </div>
 
         <div className='absolute xs:right-0 md:right-8 z-10'>
           
@@ -760,35 +783,37 @@ useEffect(() => {
           </div>
         </div>
 
-       <ReactFlow
-              ref={ref}
-              nodes={nodes}
-              edges={edges}
-              onNodesChange={onNodesChange}
-              onEdgesChange={onEdgesChange}
-              onConnect={onConnect}
-              onNodeClick={onNodeClick}
-              onPaneClick={onPaneClick}
-              onNodeContextMenu={onNodeContextMenu}
-              onNodeDragStop={handleNodeDragStop}
-              fitView
-            >
-     <Background />
-      {menu && <ContextMenu onClick={onPaneClick} {...menu} 
-          newNodeCreationFunction={createNewNode} 
-          deletionOfNodeFunction={deleteNode} 
-          updateBgColorOfnode={updateBgColorOfnode} 
-          updatedText={updatedText} 
-          UpdateAddLink={UpdateAddLink} 
-          deleteAllNodes={deleteAllNodes}
-          handleFindNodeUrlLink={handleFindNodeUrlLink}
-          buttonStateChecker={stateButtonLoaded}
-          checkLinkUpdated={checkLinkUpdated}
-          setCheckLinkUpdated={setCheckLinkUpdated}
-      />
-      }
-    </ReactFlow>
+        <ReactFlow
+          ref={ref}
+          nodes={nodes}
+          edges={edges}
+          onNodesChange={onNodesChange}
+          onEdgesChange={onEdgesChange}
+          onConnect={onConnect}
+          onNodeClick={onNodeClick}
+          onPaneClick={onPaneClick}
+          onNodeContextMenu={onNodeContextMenu}
+          onNodeDragStop={handleNodeDragStop}
+          fitView
+        >
+        <Background />
+          {menu && <ContextMenu onClick={onPaneClick} {...menu} 
+              newNodeCreationFunction={createNewNode} 
+              deletionOfNodeFunction={deleteNode} 
+              updateBgColorOfnode={updateBgColorOfnode} 
+              updatedText={updatedText} 
+              UpdateAddLink={UpdateAddLink} 
+              deleteAllNodes={deleteAllNodes}
+              handleFindNodeUrlLink={handleFindNodeUrlLink}
+              buttonStateChecker={stateButtonLoaded}
+              checkLinkUpdated={checkLinkUpdated}
+              setCheckLinkUpdated={setCheckLinkUpdated}
+          />
+          }
+        </ReactFlow>
 
+      </div>
+    }
    </div>
   )
 }
