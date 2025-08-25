@@ -475,10 +475,76 @@ export default function Page() {
                     </DialogContent>
                   </Dialog>
               </div>
-              <p className="flex opacity-40 items-center border-b bg-violet-100 rounded py-1 cursor-pointer justify-center gap-1">
+
+              {/* <p className="flex opacity-40 items-center border-b bg-violet-100 rounded py-1 cursor-pointer justify-center gap-1">
                 <span className="dark:text-black opacity-75">Generate with AI</span>
                 <span><Star size={10} /></span>
-              </p>
+              </p> */}
+
+              <div className=" font-sans cursor-pointer bg-purple-100 rounded hover:bg-purple-200 px-2 self-center flex justify-start">
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <button className="self-centerc  dark:text-black">
+                      <p className="flex items-center font-sans rounded py-1 cursor-pointer justify-start gap-1">
+                        <span className="dark:text-black">Generate with AI</span>
+                        <span><Star size={10} className="text-white" /></span>
+                      </p>
+                    </button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[560px]">
+                    <DialogHeader>
+                      <DialogTitle className="text-base">Generate diagram with Ai.</DialogTitle>
+                      <DialogDescription className="opacity-70 text-sm">
+                        What do you want to create..
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                      <div className="flex flex-col items-start gap-4">
+                        <Label htmlFor="description" className="text-right">
+                          What style you want your diagram to be.
+                        </Label>
+                        <div className="flex flex-wrap gap-5 items-center">
+                          {diagramStyleToChoose.map((data,idx) => (
+                            <p 
+                              key={idx} 
+                              onClick={() => {
+                                setSelectedStyle(idx)
+                                setSelectedStyleName(data?.stylename)
+                              }}
+                              className={`
+                                px-4 py-1 rounded-full text-sm cursor-pointer
+                                ${selectedStyle === idx ? 'bg-violet-500 text-white font-semibold ': 'bg-violet-200'}
+                              `}
+                            >{data?.stylename}</p>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="flex flex-col items-start gap-4">
+                        <Label htmlFor="description" className="text-right">
+                          Describe your diagram here
+                        </Label>
+                        <textarea
+                          id="description"
+                          className="col-span-3 px-2 py-1 text-sm border border-black rounded-md w-full"
+                          value={description}
+                          rows={7}
+                          onChange={(e) => setdescription(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                    <DialogFooter>
+                      <div className="flex flex-col gap-3 items-center justify-center w-full ">
+
+                      <Button type="submit" onClick={handleGenerateMarkdown} className="pl-20 pr-20 text-sm "> 
+                                {stateButtonLoaded === true ? <Loader2 size={12} className="animate-spin"/> : "Create"}
+                      </Button>
+                      <p className="text-black text-xs">powered by google gemini.</p>
+                      </div>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+            </div>
+
             </div>
           ) : (
             <>

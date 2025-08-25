@@ -77,7 +77,7 @@ export default function Home() {
         </div>
       </div>
       {/* Image section  */}
-      <div className='flex flex-row items-end max-h-[30rem] overflow-hidden'>
+      <div className='xs:hidden xs:invisible md:visible md:block flex flex-row items-end max-h-[30rem] overflow-hidden'>
         {
           imageData.map((data:imageDataType,idx:number) => (
             <div key={idx} className='flex flex-col items-center bg-zinc-100'>
