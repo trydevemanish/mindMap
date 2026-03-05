@@ -34,7 +34,9 @@ export default function Home() {
               <div className='flex flex-row gap-4'>
                 <button className='text-xs border hover:bg-zinc-200 shadow-md shadow-purple-50 px-7 rounded-md py-[7px] flex flex-row items-center gap-1'>
                   <LucideStars className='size-3' />
+                  <Link href={'https://github.com/trydevemanish/mindMap'}>
                   <span>Star on github</span>
+                  </Link> 
                 </button>
 
                 <button className='text-xs bg-purple-200 hover:bg-purple-300 px-7 rounded-md py-[7px]'>
